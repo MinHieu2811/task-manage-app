@@ -1,8 +1,8 @@
 import React from 'react';
 import { Button, Typography, useTheme } from '@mui/material';
 import styled from '@emotion/styled'
-import { MainLayout } from '@/component/layout/index'
-import { useSignInWithEmailAndPassword, useSignInWithGoogle } from 'react-firebase-hooks/auth'
+import { MainLayout } from '@/component/layout'
+import { useCreateUserWithEmailAndPassword } from 'react-firebase-hooks/auth'
 import { auth } from 'config/firebase';
 import { useState } from 'react';
 import { TextField } from '@mui/material';
@@ -60,27 +60,37 @@ const StyledButton = styled(Button)`
     }
 `
 
-export default function LoginPage() {
+export default function RegisterPage() {
     const theme = useTheme()
     const [email, setEmail] = useState<string>('')
     const [password, setPassword] = useState<string>('')
-    const [signInWithGoogle, _user, _loading, error] = useSignInWithGoogle(auth)
-    const [signInWithEmailAndPassword, _customer, _loadingg, errors] = useSignInWithEmailAndPassword(auth)
     const { notiDispatch } = useNotiContext()
-
-    const signInGoogleHandler = () => {
-        signInWithGoogle()
-    }
+    const [
+        createUserWithEmailAndPassword,
+        user,
+        loading,
+        error,] = useCreateUserWithEmailAndPassword(auth)
 
     const signInEmailHandler = () => {
-        signInWithEmailAndPassword(email, password)
+        createUserWithEmailAndPassword(email, password)
+        if(error) {
+            notiDispatch({
+                type: 'REMOVE_ALL_AND_ADD',
+                payload: {
+                    content: 'This email already exists',
+                    type: 'is-danger',
+                    removable: true
+                }
+            })
+        }
     }
     return (
         <MainLayout>
             <Helmet title='Login' />
             <StyledContainer style={{backgroundColor: `${theme.palette.primary.main}`}}>
+                <Loading isLoading={loading} />
                 <StyledLoginContainer color='secondary'>
-                    <StyledTypography variant='h2'>Login</StyledTypography>
+                    <StyledTypography variant='h2'>Register</StyledTypography>
                     <StyledInputGroup>
                         <StyledInput color='secondary' type="email" placeholder='Email' value={email} onChange={(e) => setEmail(e.target.value)} />
                     </StyledInputGroup>
@@ -89,21 +99,18 @@ export default function LoginPage() {
                         <StyledInput color='secondary' type="password" placeholder='Password' value={password} onChange={(e) => setPassword(e.target.value)} />
                     </StyledInputGroup>
                     <StyledButton variant="contained" onClick={signInEmailHandler} sx={{backgroundColor: theme.palette.secondary.main}}>
-                        Log in 
-                    </StyledButton>
-                    <StyledButton variant="contained" onClick={signInGoogleHandler} sx={{backgroundColor: theme.palette.secondary.main}}>
-                        Sign in with Google
+                        Register
                     </StyledButton>
                     <ButtonBase
                         LinkComponent={Button}
-                        href='/register'
+                        href='/login'
                         sx={{
                             padding: '10px',
                             backgroundColor: 'transparent',
                             color: 'black',
                         }}
                     >
-                        Dont have an account? Sign up
+                        Already have an account? Sign in
                     </ButtonBase>
                 </StyledLoginContainer>
             </StyledContainer>

@@ -4,12 +4,13 @@ import { ThemeProvider } from '@mui/material'
 import { theme, createEmotionCache } from '@/utils/index'
 import { EmptyLayout } from '@/component/layout/'
 import { AppPropsWithLayout } from '@/models/layout'
-import Loading from '@/component/common/loading'
+import { Loading } from '@/component/common'
 import { useAuthState } from 'react-firebase-hooks/auth'
 import { auth, db } from 'config/firebase'
 import { useEffect } from 'react'
 import { doc, serverTimestamp, setDoc } from 'firebase/firestore'
 import LoginPage from './login'
+import { NotiProvider } from '@/component/common/notification/noti-context'
 const clientSideEmotionCache = createEmotionCache()
 
 function MyApp({ Component, pageProps, emotionCache = clientSideEmotionCache }: AppPropsWithLayout) {
@@ -42,7 +43,9 @@ function MyApp({ Component, pageProps, emotionCache = clientSideEmotionCache }: 
     <CacheProvider value={emotionCache}>
       <ThemeProvider theme={theme}>
         <EmptyLayout>
-          <Loading isLoading={loading} />
+          <NotiProvider>
+            <Loading isLoading={loading} />
+          </NotiProvider>
         </EmptyLayout>
       </ThemeProvider>
     </CacheProvider>
@@ -51,7 +54,9 @@ function MyApp({ Component, pageProps, emotionCache = clientSideEmotionCache }: 
   if (!loggedInUser) return (
     <CacheProvider value={emotionCache}>
       <ThemeProvider theme={theme}>
-        <LoginPage />
+        <NotiProvider>
+          <LoginPage />
+        </NotiProvider>
       </ThemeProvider>
     </CacheProvider>
   )
@@ -60,7 +65,9 @@ function MyApp({ Component, pageProps, emotionCache = clientSideEmotionCache }: 
     <CacheProvider value={emotionCache}>
       <ThemeProvider theme={theme}>
         <Layout>
-          <Component {...pageProps} />
+          <NotiProvider>
+            <Component {...pageProps} />
+          </NotiProvider>
         </Layout>
       </ThemeProvider>
     </CacheProvider>
