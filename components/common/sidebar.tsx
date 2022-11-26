@@ -1,4 +1,4 @@
-import { Box, Drawer, IconButton, Link, List, ListItem, ListItemButton, Typography } from '@mui/material';
+import { Box, Drawer, IconButton, Link, List, ListItem, ListItemButton, Tooltip, Typography } from '@mui/material';
 import * as React from 'react'
 // import { DragDropContext, Draggable, Droppable, DropResult } from 'react-beautiful-dnd'
 import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined'
@@ -7,10 +7,10 @@ import styled from '@emotion/styled'
 import { BoardModel } from '@/models/index';
 import { useRouter } from 'next/router'
 import { Loading } from './loading'
-import Button from '@mui/material/Button'
-import { useAuthState } from 'react-firebase-hooks/auth';
+import { useAuthState, useSignOut } from 'react-firebase-hooks/auth';
 import { auth } from 'config/firebase';
 import AvatarUser from './avatar';
+import { useNotiContext } from './notification';
 
 const StyledContainer = styled.div`
     position: relative;
@@ -19,8 +19,10 @@ const StyledContainer = styled.div`
 
 export function Sidebar() {
     const [user, loading, error] = useAuthState(auth)
+    const [signOut, signOutLoading, signOutErr] = useSignOut(auth) 
     const [activeIndex, setActiveIndex] = React.useState(0)
     const router = useRouter()
+    const { notiDispatch } = useNotiContext()
 
     // const onDragEndHandler = async ({ source, destination }: DropResult) => {
     //     const newList = [...data]
@@ -37,7 +39,21 @@ export function Sidebar() {
     //     }
     // }
 
-    if (loading) {
+    const handleSignOut = async () => {
+        await signOut().then(() => {
+            if (!signOutErr) {
+                notiDispatch({
+                    type: 'REMOVE_ALL_AND_ADD',
+                    payload: {
+                        content: 'Sign out successfully!',
+                        type: 'is-info'
+                    }
+                })
+            }
+        })
+    }
+
+    if (loading || signOutLoading) {
         return <Loading isLoading={loading} />
     }
     return (
@@ -68,9 +84,11 @@ export function Sidebar() {
                                 {user?.displayName}
                             </Typography>
                         </Box>
-                        <IconButton>
-                            <LogoutOutlinedIcon fontSize='small' style={{ color: 'white' }} />
-                        </IconButton>
+                        <Tooltip title='Logout'>
+                            <IconButton onClick={handleSignOut}>
+                                <LogoutOutlinedIcon fontSize='small' style={{ color: 'white' }} />
+                            </IconButton>
+                        </Tooltip>
                     </Box>
                 </ListItem>
                 <Box sx={{ paddingTop: '10px' }} />
