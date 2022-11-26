@@ -15,6 +15,7 @@ export interface INotiOptions {
   timeout?: number
   type?: INotiType
   id?: number
+  typeAni?: string
 }
 
 export interface INotiStateItem extends INotiOptions {

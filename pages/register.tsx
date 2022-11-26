@@ -10,6 +10,7 @@ import { ButtonBase } from '@mui/material';
 import { Helmet } from '@/component/common';
 import { Loading } from '@/component/common';
 import { useNotiContext } from '@/component/common/notification';
+import { NotiProvider } from '@/component/common/notification/noti-context';
 
 const StyledContainer = styled.div`
     height: 100vh;
@@ -73,7 +74,7 @@ export default function RegisterPage() {
 
     const signInEmailHandler = () => {
         createUserWithEmailAndPassword(email, password)
-        if(error) {
+        if (error) {
             notiDispatch({
                 type: 'REMOVE_ALL_AND_ADD',
                 payload: {
@@ -86,34 +87,37 @@ export default function RegisterPage() {
     }
     return (
         <MainLayout>
-            <Helmet title='Login' />
-            <StyledContainer style={{backgroundColor: `${theme.palette.primary.main}`}}>
-                <Loading isLoading={loading} />
-                <StyledLoginContainer color='secondary'>
-                    <StyledTypography variant='h2'>Register</StyledTypography>
-                    <StyledInputGroup>
-                        <StyledInput color='secondary' type="email" placeholder='Email' value={email} onChange={(e) => setEmail(e.target.value)} />
-                    </StyledInputGroup>
+            <NotiProvider>
+                <Helmet title='Login' />
+                <StyledContainer style={{ backgroundColor: `${theme.palette.primary.main}` }}>
+                    <Loading isLoading={loading} />
+                    <StyledLoginContainer color='secondary'>
+                        <StyledTypography variant='h2'>Register</StyledTypography>
+                        <StyledInputGroup>
+                            <StyledInput color='secondary' type="email" placeholder='Email' value={email} onChange={(e) => setEmail(e.target.value)} />
+                        </StyledInputGroup>
 
-                    <StyledInputGroup>
-                        <StyledInput color='secondary' type="password" placeholder='Password' value={password} onChange={(e) => setPassword(e.target.value)} />
-                    </StyledInputGroup>
-                    <StyledButton variant="contained" onClick={signInEmailHandler} sx={{backgroundColor: theme.palette.secondary.main}}>
-                        Register
-                    </StyledButton>
-                    <ButtonBase
-                        LinkComponent={Button}
-                        href='/login'
-                        sx={{
-                            padding: '10px',
-                            backgroundColor: 'transparent',
-                            color: 'black',
-                        }}
-                    >
-                        Already have an account? Sign in
-                    </ButtonBase>
-                </StyledLoginContainer>
-            </StyledContainer>
+                        <StyledInputGroup>
+                            <StyledInput color='secondary' type="password" placeholder='Password' value={password} onChange={(e) => setPassword(e.target.value)} />
+                        </StyledInputGroup>
+                        <StyledButton variant="contained" onClick={signInEmailHandler} sx={{ backgroundColor: theme.palette.secondary.main }}>
+                            Register
+                        </StyledButton>
+                        <ButtonBase
+                            LinkComponent={Button}
+                            href='/login'
+                            sx={{
+                                padding: '10px',
+                                backgroundColor: 'transparent',
+                                color: 'black',
+                            }}
+                        >
+                            Already have an account? Sign in
+                        </ButtonBase>
+                    </StyledLoginContainer>
+                </StyledContainer>
+            </NotiProvider>
+
         </MainLayout>
     );
 }
