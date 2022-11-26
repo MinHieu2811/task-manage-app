@@ -99,7 +99,7 @@ const Notification: FC<INotiStateItem> = ({
   id,
   content = '',
   removable = true,
-  timeout = 10000000,
+  timeout = 10,
   type = '',
   typeAni
 }) => {
