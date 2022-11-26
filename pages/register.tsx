@@ -117,7 +117,6 @@ export default function RegisterPage() {
                     </StyledLoginContainer>
                 </StyledContainer>
             </NotiProvider>
-
         </MainLayout>
     );
 }
