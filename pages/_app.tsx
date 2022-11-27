@@ -43,9 +43,9 @@ function MyApp({ Component, pageProps, emotionCache = clientSideEmotionCache }: 
     <CacheProvider value={emotionCache}>
       <ThemeProvider theme={theme}>
         <EmptyLayout>
-          <NotiProvider>
+          {/* <NotiProvider> */}
             <Loading isLoading={loading} />
-          </NotiProvider>
+          {/* </NotiProvider> */}
         </EmptyLayout>
       </ThemeProvider>
     </CacheProvider>
@@ -54,9 +54,9 @@ function MyApp({ Component, pageProps, emotionCache = clientSideEmotionCache }: 
   if (!loggedInUser) return (
     <CacheProvider value={emotionCache}>
       <ThemeProvider theme={theme}>
-        <NotiProvider>
+        {/* <NotiProvider> */}
           <LoginPage />
-        </NotiProvider>
+        {/* </NotiProvider> */}
       </ThemeProvider>
     </CacheProvider>
   )
@@ -65,9 +65,9 @@ function MyApp({ Component, pageProps, emotionCache = clientSideEmotionCache }: 
     <CacheProvider value={emotionCache}>
       <ThemeProvider theme={theme}>
         <Layout>
-          <NotiProvider>
+          {/* <NotiProvider> */}
             <Component {...pageProps} />
-          </NotiProvider>
+          {/* </NotiProvider> */}
         </Layout>
       </ThemeProvider>
     </CacheProvider>

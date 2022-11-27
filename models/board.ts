@@ -5,7 +5,7 @@ export interface BoardModel {
     icon?: string,
     position: number,
     title: string,
-    userEmail: string,
+    userId: string,
     sections: SectionModel[]
 }
 
