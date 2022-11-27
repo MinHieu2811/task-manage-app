@@ -1,4 +1,4 @@
-import { Box, Drawer, IconButton, Link, List, ListItem, ListItemButton, Tooltip, Typography } from '@mui/material';
+import { Box, Drawer, IconButton, Link, List, ListItem, ListItemButton, Tooltip, Typography, useTheme } from '@mui/material';
 import * as React from 'react'
 import { DragDropContext, Draggable, Droppable, DropResult } from 'react-beautiful-dnd'
 import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined'
@@ -12,6 +12,7 @@ import { auth, db } from 'config/firebase';
 import AvatarUser from './avatar';
 import { useNotiContext } from './notification';
 import { getDocs, collection, addDoc } from 'firebase/firestore';
+import { generateId } from '@/utils/generateId';
 
 const StyledContainer = styled.div`
     position: relative;
@@ -19,9 +20,9 @@ const StyledContainer = styled.div`
 `
 
 export function Sidebar() {
+    const theme = useTheme()
     const [user, loading, error] = useAuthState(auth)
     const [signOut, signOutLoading, signOutErr] = useSignOut(auth)
-    const [activeIndex, setActiveIndex] = React.useState(0)
     const router = useRouter()
     const { notiDispatch } = useNotiContext()
     const [boards, setBoards] = React.useState<BoardModel[]>([])
@@ -38,11 +39,12 @@ export function Sidebar() {
             setBoards(arrBoard)
         }
         readDoc()
-    }, [user, boards])
+    }, [user])
 
     console.log(boards)
     const addBoardHandle = async () => {
         await addDoc(collection(db, 'boards'), {
+            _id: generateId(),
             description: 'This is description',
             favorite: false,
             favoritePosition: 0,
@@ -54,20 +56,17 @@ export function Sidebar() {
         })
     }
 
-    // const onDragEndHandler = async ({ source, destination }: DropResult) => {
-    //     const newList = [...boards]
-    //     const [removed] = newList.splice(source?.index, 1)
-    //     newList.splice(destination?.index || 0, 0, removed)
+    const onDragEndHandler = async ({ source, destination }: DropResult) => {
+        const newList = [...boards]
+        const [removed] = newList.splice(source?.index, 1)
+        newList.splice(destination?.index || 0, 0, removed)
 
-    //     const activeItem = newList.findIndex(e => e.id === router.query)
-    //     setActiveIndex(activeItem)
-
-    //     try {
-    //         //   await boardApi.updatePosition({ boards: newList })
-    //     } catch (err) {
-    //         console.log(err)
-    //     }
-    // }
+        try {
+            //   await boardApi.updatePosition({ boards: newList })
+        } catch (err) {
+            console.log(err)
+        }
+    }
 
     const handleSignOut = async () => {
         await signOut().then(() => {
@@ -115,7 +114,11 @@ export function Sidebar() {
                             </Typography>
                         </Box>
                         <Tooltip title='Logout'>
-                            <IconButton onClick={handleSignOut}>
+                            <IconButton onClick={handleSignOut} sx={{
+                                ':hover': {
+                                    backgroundColor: 'rgba(243, 236, 236, 0.637) !important'
+                                },
+                            }}>
                                 <LogoutOutlinedIcon fontSize='small' style={{ color: 'white' }} />
                             </IconButton>
                         </Tooltip>
@@ -134,12 +137,18 @@ export function Sidebar() {
                         <Typography variant='body2' fontWeight='700' style={{ color: 'white' }}>
                             Private
                         </Typography>
-                        <IconButton>
-                            <AddBoxOutlinedIcon fontSize='small' style={{ color: 'white' }} onClick={addBoardHandle}/>
-                        </IconButton>
+                        <Tooltip title="Add board">
+                            <IconButton sx={{
+                                ':hover': {
+                                    backgroundColor: 'rgba(243, 236, 236, 0.637) !important'
+                                },
+                            }}>
+                                <AddBoxOutlinedIcon fontSize='small' style={{ color: 'white' }} onClick={addBoardHandle} />
+                            </IconButton>
+                        </Tooltip>
                     </Box>
                 </ListItem>
-                {/* {
+                {
                     boards && (
                         <DragDropContext onDragEnd={onDragEndHandler}>
                             <Droppable key={'list-board-droppable'} droppableId={'list-board-droppable'}>
@@ -147,17 +156,22 @@ export function Sidebar() {
                                     <div ref={provided.innerRef} {...provided.droppableProps}>
                                         {
                                             boards?.map((item: BoardModel, index: number) => (
-                                                <Draggable key={item.id} draggableId={item.id} index={index}>
+                                                <Draggable key={item?._id} draggableId={item._id} index={index}>
                                                     {(provided, snapshot) => (
                                                         <ListItemButton
                                                             ref={provided.innerRef}
                                                             {...provided.dragHandleProps}
                                                             {...provided.draggableProps}
-                                                            selected={index === activeIndex}
+                                                            selected={router?.pathname?.includes(item?._id)}
                                                             component={Link}
-                                                            href={`/boards/${item.id}`}
+                                                            href={`/boards/${item._id}`}
                                                             sx={{
                                                                 pl: '20px',
+                                                                transition: 'background-color 0.3s ease-in-out',
+                                                                borderBottom: `2px solid ${theme.palette.secondary.main}`,
+                                                                ':hover': {
+                                                                    backgroundColor: 'rgba(243, 236, 236, 0.637) !important'
+                                                                },
                                                                 cursor: snapshot.isDragging ? 'grab' : 'pointer !important'
                                                             }}
                                                         >
@@ -179,7 +193,7 @@ export function Sidebar() {
                             </Droppable>
                         </DragDropContext>
                     )
-                } */}
+                }
             </List>
         </StyledContainer>
     );

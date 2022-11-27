@@ -1,4 +1,5 @@
 export interface BoardModel {
+    _id: string
     description: string,
     favorite?: boolean,
     favoritePosition: number,
