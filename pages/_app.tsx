@@ -11,6 +11,8 @@ import { useEffect } from 'react'
 import { doc, serverTimestamp, setDoc } from 'firebase/firestore'
 import LoginPage from './login'
 import { NotiProvider } from '@/component/common/notification/noti-context'
+import { Provider } from 'react-redux'
+import { store } from 'redux/store'
 const clientSideEmotionCache = createEmotionCache()
 
 function MyApp({ Component, pageProps, emotionCache = clientSideEmotionCache }: AppPropsWithLayout) {
@@ -40,37 +42,43 @@ function MyApp({ Component, pageProps, emotionCache = clientSideEmotionCache }: 
   }, [loggedInUser])
 
   if (loading) return (
-    <CacheProvider value={emotionCache}>
-      <ThemeProvider theme={theme}>
-        <EmptyLayout>
-          {/* <NotiProvider> */}
+    <Provider store={store}>
+      <CacheProvider value={emotionCache}>
+        <ThemeProvider theme={theme}>
+          <EmptyLayout>
+            {/* <NotiProvider> */}
             <Loading isLoading={loading} />
-          {/* </NotiProvider> */}
-        </EmptyLayout>
-      </ThemeProvider>
-    </CacheProvider>
+            {/* </NotiProvider> */}
+          </EmptyLayout>
+        </ThemeProvider>
+      </CacheProvider>
+    </Provider>
   )
 
   if (!loggedInUser) return (
-    <CacheProvider value={emotionCache}>
-      <ThemeProvider theme={theme}>
-        {/* <NotiProvider> */}
+    <Provider store={store}>
+      <CacheProvider value={emotionCache}>
+        <ThemeProvider theme={theme}>
+          {/* <NotiProvider> */}
           <LoginPage />
-        {/* </NotiProvider> */}
-      </ThemeProvider>
-    </CacheProvider>
+          {/* </NotiProvider> */}
+        </ThemeProvider>
+      </CacheProvider>
+    </Provider>
   )
 
   return (
-    <CacheProvider value={emotionCache}>
-      <ThemeProvider theme={theme}>
-        <Layout>
-          {/* <NotiProvider> */}
+    <Provider store={store}>
+      <CacheProvider value={emotionCache}>
+        <ThemeProvider theme={theme}>
+          <Layout>
+            {/* <NotiProvider> */}
             <Component {...pageProps} />
-          {/* </NotiProvider> */}
-        </Layout>
-      </ThemeProvider>
-    </CacheProvider>
+            {/* </NotiProvider> */}
+          </Layout>
+        </ThemeProvider>
+      </CacheProvider>
+    </Provider>
   )
 }
 export default MyApp

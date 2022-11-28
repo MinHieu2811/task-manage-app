@@ -11,8 +11,12 @@ import { useAuthState, useSignOut } from 'react-firebase-hooks/auth';
 import { auth, db } from 'config/firebase';
 import AvatarUser from './avatar';
 import { useNotiContext } from './notification';
-import { getDocs, collection, addDoc } from 'firebase/firestore';
+import { collection, addDoc } from 'firebase/firestore';
 import { generateId } from '@/utils/generateId';
+import { getCollectionDoc } from '@/utils/index';
+import { useDispatch } from 'react-redux';
+import { setBoards } from 'redux/features/boardSlice';
+import { useSelector } from 'react-redux';
 
 const StyledContainer = styled.div`
     position: relative;
@@ -20,44 +24,63 @@ const StyledContainer = styled.div`
 `
 
 export function Sidebar() {
+    const dispatch = useDispatch()
     const theme = useTheme()
     const [user, loading, error] = useAuthState(auth)
+    const [loadFetch, setLoadFetch] = React.useState(false)
     const [signOut, signOutLoading, signOutErr] = useSignOut(auth)
     const router = useRouter()
     const { notiDispatch } = useNotiContext()
-    const [boards, setBoards] = React.useState<BoardModel[]>([])
+    const [boardsList, setBoardsList] = React.useState<BoardModel[]>([])
+    const boards = useSelector((state: any) => state.board.value)
+    console.log(boards);
 
     React.useEffect(() => {
         const readDoc = async () => {
+            setLoadFetch(true)
             let arrBoard: BoardModel[] = []
-            const dataCol = await getDocs(collection(db, "boards"));
-            dataCol?.forEach((item) => {
-                if (item?.data() && item?.data().userId === user?.uid) {
-                    arrBoard = [...arrBoard, item.data()] as BoardModel[]
-                }
-            })
-            setBoards(arrBoard)
+                // const dataCol = await getDocs(collection(db, "boards"));
+                ; (await
+                    getCollectionDoc('boards'))?.forEach((item) => {
+                        if (item?.data() && item?.data().userId === user?.uid) {
+                            arrBoard = [...arrBoard, item.data()] as BoardModel[]
+                        }
+                    })
+            setBoardsList(arrBoard)
+            dispatch(setBoards(arrBoard))
+            setLoadFetch(false)
         }
         readDoc()
-    }, [user])
+    }, [user, dispatch])
 
-    console.log(boards)
     const addBoardHandle = async () => {
+        const boardLength: number = (await getCollectionDoc('boards'))?.docs?.length
         await addDoc(collection(db, 'boards'), {
             _id: generateId(),
             description: 'This is description',
             favorite: false,
             favoritePosition: 0,
             icon: '',
-            position: boards?.length === 0 ? 0 : boards?.length,
+            position: boardLength === 0 ? 0 : boardLength,
             title: 'Untitled',
             userId: user?.uid,
             sections: []
         })
+        dispatch(setBoards([...boards, {
+            _id: generateId(),
+            description: 'This is description',
+            favorite: false,
+            favoritePosition: 0,
+            icon: '',
+            position: boardLength === 0 ? 0 : boardLength,
+            title: 'Untitled',
+            userId: user?.uid,
+            sections: []
+        }]))
     }
 
     const onDragEndHandler = async ({ source, destination }: DropResult) => {
-        const newList = [...boards]
+        const newList = [...boardsList]
         const [removed] = newList.splice(source?.index, 1)
         newList.splice(destination?.index || 0, 0, removed)
 
@@ -81,12 +104,9 @@ export function Sidebar() {
             }
         })
     }
-
-    if (loading || signOutLoading) {
-        return <Loading isLoading={loading} />
-    }
     return (
         <StyledContainer>
+            {(loading || signOutLoading || loadFetch) && <Loading isLoading={loading || signOutLoading || loadFetch} />}
             <List
                 disablePadding
                 sx={{
@@ -149,7 +169,7 @@ export function Sidebar() {
                     </Box>
                 </ListItem>
                 {
-                    boards && (
+                    !loadFetch && boardsList && (
                         <DragDropContext onDragEnd={onDragEndHandler}>
                             <Droppable key={'list-board-droppable'} droppableId={'list-board-droppable'}>
                                 {(provided) => (
