@@ -1,5 +1,4 @@
 import React, { createContext, useReducer, useContext, ReactNode, Dispatch } from 'react'
-import usePortal from 'react-useportal'
 
 import {
   INotiStateItem,

@@ -4,7 +4,7 @@ import { DragDropContext, Draggable, Droppable, DropResult } from 'react-beautif
 import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined'
 import AddBoxOutlinedIcon from '@mui/icons-material/AddBoxOutlined'
 import styled from '@emotion/styled'
-import { BoardModel } from '@/models/index';
+import { BoardData, BoardModel } from '@/models/index';
 import { useRouter } from 'next/router'
 import { Loading } from './loading'
 import { useAuthState, useSignOut } from 'react-firebase-hooks/auth';
@@ -33,7 +33,6 @@ export function Sidebar() {
     const { notiDispatch } = useNotiContext()
     const [boardsList, setBoardsList] = React.useState<BoardModel[]>([])
     const boards = useSelector((state: any) => state.board.value)
-    console.log(boards);
 
     React.useEffect(() => {
         const readDoc = async () => {
@@ -43,7 +42,7 @@ export function Sidebar() {
                 ; (await
                     getCollectionDoc('boards'))?.forEach((item) => {
                         if (item?.data() && item?.data().userId === user?.uid) {
-                            arrBoard = [...arrBoard, item.data()] as BoardModel[]
+                            arrBoard = [...arrBoard, {boardData: item?.data(), boardId: item?.id}] as BoardModel[]
                         }
                     })
             setBoardsList(arrBoard)
@@ -175,18 +174,19 @@ export function Sidebar() {
                                 {(provided) => (
                                     <div ref={provided.innerRef} {...provided.droppableProps}>
                                         {
-                                            boards?.map((item: BoardModel, index: number) => (
-                                                <Draggable key={item?._id} draggableId={item._id} index={index}>
+                                            boards?.map((item: BoardData, index: number) => (
+                                                <Draggable key={item?.boardId} draggableId={item.boardId} index={index}>
                                                     {(provided, snapshot) => (
                                                         <ListItemButton
                                                             ref={provided.innerRef}
                                                             {...provided.dragHandleProps}
                                                             {...provided.draggableProps}
-                                                            selected={router?.pathname?.includes(item?._id)}
+                                                            selected={router?.query?.id?.includes(item?.boardId)}
                                                             component={Link}
-                                                            href={`/boards/${item._id}`}
+                                                            href={`/boards/${item.boardId}`}
                                                             sx={{
                                                                 pl: '20px',
+                                                                backgroundColor: `${router?.query?.id?.includes(item?.boardId) ? `${theme?.palette?.secondary?.main} !important` : 'transparent'}`,
                                                                 transition: 'background-color 0.3s ease-in-out',
                                                                 borderBottom: `2px solid ${theme.palette.secondary.main}`,
                                                                 ':hover': {
@@ -199,7 +199,7 @@ export function Sidebar() {
                                                             <Typography variant='body2'
                                                                 fontWeight='700'
                                                                 sx={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                                                {item.icon} {item.title}
+                                                                {item?.boardData?.icon} {item?.boardData?.title}
                                                             </Typography>
                                                         </ListItemButton>
                                                     )}

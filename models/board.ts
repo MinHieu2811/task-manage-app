@@ -30,3 +30,7 @@ export interface TaskModel {
     favoritePosition: number
     _id: string
 }
+export interface BoardData {
+    boardData: BoardModel
+    boardId: string
+}
