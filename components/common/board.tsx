@@ -9,45 +9,7 @@ import { Loading } from './loading';
 import { useDispatch } from 'react-redux';
 import { setBoards } from 'redux/features/boardSlice';
 import { BoardData } from '@/models/board';
-import styled from '@emotion/styled'
-import StarBorderOutlinedIcon from '@mui/icons-material/StarBorderOutlined';
-
-const StyledInputTitle = styled.input`
-  width: 100%;
-  border: 0;
-  padding: 10px 15px;
-  font-size: 30px;
-  outline: none;
-  background: transparent;
-  &::placeholder {
-    color: white;
-  }
-  color: white;
-  margin: 20px 0px;
-`
-
-const StyledLine = styled.div`
-  width: 100%;
-  height: 2px;
-  background-color: gray;
-`
-
-const StyledInputDesc = styled.textarea`
-  width: 100%;
-  border: 0;
-  height: 200px;
-  max-height: 500px;
-  resize: vertical;
-  padding: 10px 15px;
-  font-size: 20px;
-  outline: none;
-  background: transparent;
-  &::placeholder {
-    color: white;
-  }
-  color: white;
-  margin: 20px 0px;
-`
+import MainBoard from './main-board';
 
 export default function BoardWrapper({boardData, boardId}: BoardData) {
   const [loggedInUser, loading, error] = useAuthState(auth)
@@ -74,30 +36,7 @@ export default function BoardWrapper({boardData, boardId}: BoardData) {
   }
   return (
     boardData ? (
-      <Box sx={{
-        width: 'calc(100vw - 250px)',
-        height: '100vh',
-        backgroundColor: '#160e36',
-      }}>
-          <Box sx={{
-            display: 'flex',
-            alignItems: 'center',
-          }}>
-
-          <StyledInputTitle name='title' placeholder={boardData?.title} />
-          <StarBorderOutlinedIcon sx={{
-            fontSize: '30px',
-            color: 'white',
-            transition: 'color 0.8s ease in out',
-            margin: '0 10px',
-            ':hover': {
-              color: 'yellow'
-            }
-          }} />
-          </Box>
-          <StyledInputDesc name='desc' placeholder={boardData?.description} />
-          <StyledLine />
-      </Box>
+      <MainBoard board={{boardData, boardId}} />
     ) : (
       <Box sx={{
         width: 'calc(100vw - 250px)',
