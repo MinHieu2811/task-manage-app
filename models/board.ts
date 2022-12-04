@@ -13,8 +13,9 @@ export interface BoardModel {
 export interface SectionModel {
     boardId: string
     description?: string
-    userName: string
+    userId: string
     title: string
+    position: number
     status: string
     tasks: []
 }
@@ -25,7 +26,7 @@ export interface TaskModel {
     title: string
     description: string
     icon: string,
-    userEmail: string
+    userId: string
     position: number
     favoritePosition: number
     _id: string
@@ -33,4 +34,12 @@ export interface TaskModel {
 export interface BoardData {
     boardData: BoardModel
     boardId: string
+}
+
+export interface SectionData extends SectionModel {
+    sectionId: string
+}
+
+export interface TaskData extends TaskModel {
+    taskId: string
 }

@@ -1,5 +1,5 @@
 import { BoardData, SectionModel, TaskModel } from '@/models/board'
-import { Box, Button, Typography, useTheme } from '@mui/material'
+import { Box, Button, Typography } from '@mui/material'
 import * as React from 'react'
 import StarBorderOutlinedIcon from '@mui/icons-material/StarBorderOutlined'
 import styled from '@emotion/styled'
@@ -10,6 +10,13 @@ import {
   DropResult,
 } from 'react-beautiful-dnd'
 import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined'
+import { useAuthState } from 'react-firebase-hooks/auth'
+import { auth, db } from 'config/firebase'
+import { useSelector } from 'react-redux'
+import { addDoc, collection } from 'firebase/firestore'
+import { useDispatch } from 'react-redux'
+import { setSection } from 'redux/features/sectionSlice'
+import AddOutlinedIcon from '@mui/icons-material/AddOutlined'
 const StyledInputTitle = styled.input`
   width: 100%;
   border: 0;
@@ -61,19 +68,25 @@ const StyledSectionsWrapper = styled.div`
 
 const StyledSection = styled.div`
   max-width: 150px;
+  min-height: 100px;
   width: 100%;
   max-height: 300px;
-  border: 1px solid red;
   margin: 20px;
   flex-wrap: wrap;
 `
 
 const StyledTitleSection = styled.div`
-  text-align: center;
+  text-align: start;
   padding: 10px;
   font-size: 1rem;
   color: white;
-  border-bottom: 1px solid #0c5203;
+`
+
+const StyledHeaderSection = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 2px solid #0c5203;
 `
 
 const StyledTask = styled.div`
@@ -81,7 +94,8 @@ const StyledTask = styled.div`
   padding: 10px;
   font-size: 1rem;
   color: white;
-  border-bottom: 1px solid #0c5203;
+  background-color: #2f2752;
+  margin: 5px 0px;
 `
 
 export interface IMainBoardProps {
@@ -89,7 +103,24 @@ export interface IMainBoardProps {
 }
 
 export default function MainBoard({ board }: IMainBoardProps) {
-  const theme = useTheme()
+  const [user, loading, error] = useAuthState(auth)
+  const dispatch = useDispatch()
+  const sectionArr = useSelector((state: any) => state?.section?.value)
+  const initialSection = {
+    boardId: board?.boardId,
+    description: 'This is description',
+    userId: user?.uid,
+    title: 'Untitled',
+    position: sectionArr?.length,
+    status: '',
+    tasks: [],
+  }
+
+  const handleAddSection = async () => {
+    const res = addDoc(collection(db, 'section'), initialSection)
+    console.log('res', res)
+    dispatch(setSection([...sectionArr, initialSection]))
+  }
   return (
     <Box
       sx={{
@@ -147,30 +178,35 @@ export default function MainBoard({ board }: IMainBoardProps) {
           margin: '0px 10px',
         }}
       >
-        <Button variant="text" sx={{ color: 'white', fontSize: '1rem' }}>
+        <Button
+          variant="text"
+          sx={{ color: 'white', fontSize: '1rem' }}
+          onClick={handleAddSection}
+        >
           Add sections
         </Button>
         <Typography component="p" sx={{ color: 'white', fontSize: '1rem' }}>
-          {board?.boardData?.sections?.length}{' '}
-          {board?.boardData?.sections?.length > 0 ? 'sections' : 'section'}
+          {sectionArr?.length} {sectionArr?.length > 0 ? 'sections' : 'section'}
         </Typography>
       </Box>
       <StyledLine />
       <StyledSectionsWrapper>
-        {board?.boardData?.sections?.length &&
-          board?.boardData?.sections?.map(
-            (item: SectionModel, index: number) => (
-              <div key={index}>
-                <Section
-                  boardId={item?.boardId}
-                  userName={item?.userName}
-                  title={item?.title}
-                  status={item?.status}
-                  tasks={item?.tasks}
-                />
-              </div>
-            ),
-          )}
+        {sectionArr.length > 0 ? (
+          sectionArr?.map((item: SectionModel) => (
+            <div key={item?.position}>
+              <Section
+                position={item?.position}
+                boardId={item?.boardId}
+                userId={item?.userId}
+                title={item?.title}
+                status={item?.status}
+                tasks={item?.tasks}
+              />
+            </div>
+          ))
+        ) : (
+          <></>
+        )}
       </StyledSectionsWrapper>
     </Box>
   )
@@ -190,7 +226,35 @@ function Section(sections: SectionModel) {
   }
   return (
     <StyledSection>
-      <StyledTitleSection>{sections?.title}</StyledTitleSection>
+      <StyledHeaderSection>
+        <StyledTitleSection>{sections?.title}</StyledTitleSection>
+        <Box sx={{ display: 'flex' }}>
+          <AddOutlinedIcon
+            sx={{
+              fontSize: '15px',
+              color: 'white',
+              transition: 'color 0.8s ease in out',
+              margin: '0 5px',
+              ':hover': {
+                color: 'red',
+              },
+              cursor: 'pointer'
+            }}
+          />
+          <DeleteOutlineOutlinedIcon
+            sx={{
+              fontSize: '15px',
+              color: 'white',
+              transition: 'color 0.8s ease in out',
+              margin: '0 5px',
+              ':hover': {
+                color: 'red',
+              },
+              cursor: 'pointer'
+            }}
+          />
+        </Box>
+      </StyledHeaderSection>
       <DragDropContext onDragEnd={onDragEndHandler}>
         <Droppable
           key={'list-board-droppable'}
