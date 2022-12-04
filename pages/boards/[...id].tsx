@@ -5,7 +5,7 @@ import * as React from 'react';
 import styled from '@emotion/styled'
 import { Helmet } from '@/component/common';
 import BoardWrapper from '@/component/common/board';
-import { BoardModel, SectionModel } from '@/models/board';
+import { BoardModel, SectionData, SectionModel } from '@/models/board';
 import { useDispatch } from 'react-redux';
 import { setSection } from 'redux/features/sectionSlice';
 
@@ -22,7 +22,6 @@ const StyledContainer = styled.div`
 `
 
 export default function BoardPage ({board, id, section}: IAppProps) {
-  console.log(section);
   const dispatch = useDispatch()
 
   React.useEffect(() => {
@@ -47,10 +46,8 @@ export const getServerSideProps = async (context: any) => {
     const board = await getDoc(docRef)
     sections?.docs?.forEach((item: QueryDocumentSnapshot<DocumentData>) => {
       if (boardId?.includes(item?.data()?.boardId)) {
-        secArr = [...secArr, item?.data()] as SectionModel[]
-      }
-    })
-    console.log(secArr)
+        secArr = [...secArr, {sectionId: item?.id, sectionData: item?.data()}] as SectionData[]
+      }})
     return {
         props: {
             board: board?.data(),

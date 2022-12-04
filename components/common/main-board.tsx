@@ -1,4 +1,4 @@
-import { BoardData, SectionModel, TaskModel } from '@/models/board'
+import { BoardData, SectionData, TaskData } from '@/models/board'
 import { Box, Button, Typography } from '@mui/material'
 import * as React from 'react'
 import StarBorderOutlinedIcon from '@mui/icons-material/StarBorderOutlined'
@@ -13,7 +13,7 @@ import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined
 import { useAuthState } from 'react-firebase-hooks/auth'
 import { auth, db } from 'config/firebase'
 import { useSelector } from 'react-redux'
-import { addDoc, collection } from 'firebase/firestore'
+import { addDoc, collection, deleteDoc, doc } from 'firebase/firestore'
 import { useDispatch } from 'react-redux'
 import { setSection } from 'redux/features/sectionSlice'
 import AddOutlinedIcon from '@mui/icons-material/AddOutlined'
@@ -40,8 +40,8 @@ const StyledLine = styled.div`
 const StyledInputDesc = styled.textarea`
   width: 100%;
   border: 0;
-  height: 200px;
-  max-height: 500px;
+  height: 100px;
+  max-height: 500px;;
   resize: vertical;
   padding: 10px 15px;
   font-size: 20px;
@@ -117,8 +117,7 @@ export default function MainBoard({ board }: IMainBoardProps) {
   }
 
   const handleAddSection = async () => {
-    const res = addDoc(collection(db, 'section'), initialSection)
-    console.log('res', res)
+    addDoc(collection(db, 'section'), initialSection)
     dispatch(setSection([...sectionArr, initialSection]))
   }
   return (
@@ -192,9 +191,10 @@ export default function MainBoard({ board }: IMainBoardProps) {
       <StyledLine />
       <StyledSectionsWrapper>
         {sectionArr.length > 0 ? (
-          sectionArr?.map((item: SectionModel) => (
+          sectionArr?.map((item: SectionData) => (
             <div key={item?.position}>
               <Section
+                sectionId={item?.sectionId}
                 position={item?.position}
                 boardId={item?.boardId}
                 userId={item?.userId}
@@ -212,7 +212,14 @@ export default function MainBoard({ board }: IMainBoardProps) {
   )
 }
 
-function Section(sections: SectionModel) {
+function Section(sections: SectionData) {
+  const sectionArr = useSelector((state: any) => state?.section?.value)
+  console.log(sections);
+
+  const handleDelete = async () => {
+    await deleteDoc(doc(db, 'section', sections?.sectionId))
+    const sectionArrFiltered = sectionArr?.filter((item: SectionData) => item?.sectionId)
+  }
   const onDragEndHandler = async ({ source, destination }: DropResult) => {
     const newList = [...sections?.tasks]
     const [removed] = newList.splice(source?.index, 1)
@@ -262,7 +269,7 @@ function Section(sections: SectionModel) {
         >
           {(provided) => (
             <div ref={provided.innerRef} {...provided.droppableProps}>
-              {sections?.tasks?.map((item: TaskModel, index: number) => (
+              {sections?.tasks?.map((item: TaskData, index: number) => (
                 <Draggable
                   key={item?.boardId}
                   draggableId={item.boardId}
