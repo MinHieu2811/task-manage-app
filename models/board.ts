@@ -2,9 +2,7 @@ export interface BoardModel {
     _id: string
     description: string,
     favorite?: boolean,
-    favoritePosition: number,
     icon?: string,
-    position: number,
     title: string,
     userId: string,
     sections: SectionModel[]
@@ -15,7 +13,6 @@ export interface SectionModel {
     description?: string
     userId: string
     title: string
-    position: number
     status: string
     tasks: []
 }
@@ -27,8 +24,6 @@ export interface TaskModel {
     description: string
     icon: string,
     userId: string
-    position: number
-    favoritePosition: number
     _id: string
 }
 export interface BoardData {
@@ -36,10 +31,12 @@ export interface BoardData {
     boardId: string
 }
 
-export interface SectionData extends SectionModel {
+export interface SectionData {
+    sectionData: SectionModel
     sectionId: string
 }
 
-export interface TaskData extends TaskModel {
+export interface TaskData {
+    taskData: TaskModel
     taskId: string
 }

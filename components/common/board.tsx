@@ -18,9 +18,7 @@ export default function BoardWrapper({boardData, boardId}: BoardData) {
     _id: generateId(),
     description: 'This is description',
     favorite: false,
-    favoritePosition: 0,
     icon: '',
-    position: 0,
     title: 'Untitled',
     userId: loggedInUser?.uid,
     sections: []

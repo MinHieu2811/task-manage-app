@@ -13,10 +13,15 @@ import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined
 import { useAuthState } from 'react-firebase-hooks/auth'
 import { auth, db } from 'config/firebase'
 import { useSelector } from 'react-redux'
-import { addDoc, collection, deleteDoc, doc } from 'firebase/firestore'
+import { addDoc, collection, deleteDoc, doc, setDoc } from 'firebase/firestore'
 import { useDispatch } from 'react-redux'
-import { setSection } from 'redux/features/sectionSlice'
+import {
+  addSection,
+  removeSection,
+  setSection,
+} from 'redux/features/sectionSlice'
 import AddOutlinedIcon from '@mui/icons-material/AddOutlined'
+import { generateId } from '@/utils/generateId'
 const StyledInputTitle = styled.input`
   width: 100%;
   border: 0;
@@ -41,7 +46,7 @@ const StyledInputDesc = styled.textarea`
   width: 100%;
   border: 0;
   height: 100px;
-  max-height: 500px;;
+  max-height: 500px;
   resize: vertical;
   padding: 10px 15px;
   font-size: 20px;
@@ -57,7 +62,7 @@ const StyledInputDesc = styled.textarea`
 
 const StyledSectionsWrapper = styled.div`
   width: 100%;
-  max-width: 1440px;
+  max-width: 1600px;
   padding: 20px;
   max-height: 50%;
   overflow: auto;
@@ -107,18 +112,23 @@ export default function MainBoard({ board }: IMainBoardProps) {
   const dispatch = useDispatch()
   const sectionArr = useSelector((state: any) => state?.section?.value)
   const initialSection = {
-    boardId: board?.boardId,
-    description: 'This is description',
-    userId: user?.uid,
-    title: 'Untitled',
-    position: sectionArr?.length,
-    status: '',
-    tasks: [],
+    sectionId: generateId(),
+    sectionData: {
+      boardId: board?.boardId,
+      description: 'This is description',
+      userId: user?.uid,
+      title: 'Untitled',
+      position: sectionArr?.length,
+      status: '',
+      tasks: [],
+    },
   }
+  console.log(sectionArr)
 
   const handleAddSection = async () => {
-    addDoc(collection(db, 'section'), initialSection)
-    dispatch(setSection([...sectionArr, initialSection]))
+    const genId = generateId()
+    await setDoc(doc(db, 'section', genId), initialSection)
+    dispatch(addSection(initialSection))
   }
   return (
     <Box
@@ -192,15 +202,10 @@ export default function MainBoard({ board }: IMainBoardProps) {
       <StyledSectionsWrapper>
         {sectionArr.length > 0 ? (
           sectionArr?.map((item: SectionData) => (
-            <div key={item?.position}>
+            <div key={item?.sectionId}>
               <Section
                 sectionId={item?.sectionId}
-                position={item?.position}
-                boardId={item?.boardId}
-                userId={item?.userId}
-                title={item?.title}
-                status={item?.status}
-                tasks={item?.tasks}
+                sectionData={item?.sectionData}
               />
             </div>
           ))
@@ -212,16 +217,15 @@ export default function MainBoard({ board }: IMainBoardProps) {
   )
 }
 
-function Section(sections: SectionData) {
-  const sectionArr = useSelector((state: any) => state?.section?.value)
-  console.log(sections);
-
+function Section({ sectionId, sectionData }: SectionData) {
+  const dispatch = useDispatch()
   const handleDelete = async () => {
-    await deleteDoc(doc(db, 'section', sections?.sectionId))
-    const sectionArrFiltered = sectionArr?.filter((item: SectionData) => item?.sectionId)
+    await deleteDoc(doc(db, 'section', sectionId))
+    dispatch(removeSection(sectionId))
   }
+
   const onDragEndHandler = async ({ source, destination }: DropResult) => {
-    const newList = [...sections?.tasks]
+    const newList = [...sectionData?.tasks]
     const [removed] = newList.splice(source?.index, 1)
     newList.splice(destination?.index || 0, 0, removed)
 
@@ -234,7 +238,7 @@ function Section(sections: SectionData) {
   return (
     <StyledSection>
       <StyledHeaderSection>
-        <StyledTitleSection>{sections?.title}</StyledTitleSection>
+        <StyledTitleSection>{sectionData?.title}</StyledTitleSection>
         <Box sx={{ display: 'flex' }}>
           <AddOutlinedIcon
             sx={{
@@ -245,7 +249,7 @@ function Section(sections: SectionData) {
               ':hover': {
                 color: 'red',
               },
-              cursor: 'pointer'
+              cursor: 'pointer',
             }}
           />
           <DeleteOutlineOutlinedIcon
@@ -257,8 +261,9 @@ function Section(sections: SectionData) {
               ':hover': {
                 color: 'red',
               },
-              cursor: 'pointer'
+              cursor: 'pointer',
             }}
+            onClick={handleDelete}
           />
         </Box>
       </StyledHeaderSection>
@@ -269,14 +274,14 @@ function Section(sections: SectionData) {
         >
           {(provided) => (
             <div ref={provided.innerRef} {...provided.droppableProps}>
-              {sections?.tasks?.map((item: TaskData, index: number) => (
+              {sectionData?.tasks?.map((item: TaskData, index: number) => (
                 <Draggable
-                  key={item?.boardId}
-                  draggableId={item.boardId}
+                  key={item?.taskData?.boardId}
+                  draggableId={item.taskData?.boardId}
                   index={index}
                 >
                   {(provided, snapshot) => (
-                    <StyledTask>{item?.title}</StyledTask>
+                    <StyledTask>{item?.taskData?.title}</StyledTask>
                   )}
                 </Draggable>
               ))}
