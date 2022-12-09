@@ -71,7 +71,6 @@ export function Sidebar() {
   }, [user, dispatch])
 
   const addBoardHandle = async () => {
-    const boardLength: number = (await getCollectionDoc('boards'))?.docs?.length
     await addDoc(collection(db, 'boards'), {
       _id: generateId(),
       description: 'This is description',
@@ -107,16 +106,6 @@ export function Sidebar() {
     } catch (err) {
       console.log(err)
     }
-  }
-
-  async function fetchBoard() {
-    await fetch('/api/board', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(user?.uid)
-    }).then((res) => console.log(res))
   }
 
   const handleSignOut = async () => {
@@ -291,7 +280,6 @@ export function Sidebar() {
             </Droppable>
           </DragDropContext>
         )}
-        <button onClick={fetchBoard}>Fetch Board</button>
       </List>
     </StyledContainer>
   )

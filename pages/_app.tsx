@@ -4,16 +4,17 @@ import { ThemeProvider } from '@mui/material'
 import { theme, createEmotionCache } from '@/utils/index'
 import { EmptyLayout } from '@/component/layout/'
 import { AppPropsWithLayout } from '@/models/layout'
-import { Helmet, Loading } from '@/component/common'
+import { Loading } from '@/component/common'
 import { useAuthState } from 'react-firebase-hooks/auth'
 import { auth, db } from 'config/firebase'
 import { useEffect } from 'react'
-import { collection, doc, getDocs, serverTimestamp, setDoc } from 'firebase/firestore'
+import { doc, serverTimestamp, setDoc } from 'firebase/firestore'
 import LoginPage from './login'
 import { NotiProvider } from '@/component/common/notification/noti-context'
 import { Provider } from 'react-redux'
 import { store } from 'redux/store'
-import { useRouter } from 'next/router'
+import { SWRConfig } from 'swr'
+import axiosClient from 'api-client/axios-client'
 const clientSideEmotionCache = createEmotionCache()
 
 function MyApp({
@@ -53,9 +54,11 @@ function MyApp({
         <CacheProvider value={emotionCache}>
           <ThemeProvider theme={theme}>
             <EmptyLayout>
-              {/* <NotiProvider> */}
-              <Loading isLoading={loading} />
-              {/* </NotiProvider> */}
+              <SWRConfig value={{fetcher: (url) => axiosClient.get(url), shouldRetryOnError: false}}>
+                {/* <NotiProvider> */}
+                <Loading isLoading={loading} />
+                {/* </NotiProvider> */}
+              </SWRConfig>
             </EmptyLayout>
           </ThemeProvider>
         </CacheProvider>
@@ -67,9 +70,11 @@ function MyApp({
       <Provider store={store}>
         <CacheProvider value={emotionCache}>
           <ThemeProvider theme={theme}>
-            {/* <NotiProvider> */}
+            <SWRConfig  value={{fetcher: (url) => axiosClient.get(url), shouldRetryOnError: false}}>
+              {/* <NotiProvider> */}
             <LoginPage />
             {/* </NotiProvider> */}
+            </SWRConfig>
           </ThemeProvider>
         </CacheProvider>
       </Provider>
@@ -80,9 +85,11 @@ function MyApp({
       <CacheProvider value={emotionCache}>
         <ThemeProvider theme={theme}>
           <Layout>
-            {/* <NotiProvider> */}
-            <Component {...pageProps} />
+           <SWRConfig value={{fetcher: (url) => axiosClient.get(url), shouldRetryOnError: false}}>
+             {/* <NotiProvider> */}
+             <Component {...pageProps} />
             {/* </NotiProvider> */}
+           </SWRConfig>
           </Layout>
         </ThemeProvider>
       </CacheProvider>
