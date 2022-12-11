@@ -54,11 +54,9 @@ function MyApp({
         <CacheProvider value={emotionCache}>
           <ThemeProvider theme={theme}>
             <EmptyLayout>
-              <SWRConfig value={{fetcher: (url) => axiosClient.get(url), shouldRetryOnError: false}}>
-                {/* <NotiProvider> */}
-                <Loading isLoading={loading} />
-                {/* </NotiProvider> */}
-              </SWRConfig>
+              {/* <NotiProvider> */}
+              <Loading isLoading={loading} />
+              {/* </NotiProvider> */}
             </EmptyLayout>
           </ThemeProvider>
         </CacheProvider>
@@ -70,11 +68,9 @@ function MyApp({
       <Provider store={store}>
         <CacheProvider value={emotionCache}>
           <ThemeProvider theme={theme}>
-            <SWRConfig  value={{fetcher: (url) => axiosClient.get(url), shouldRetryOnError: false}}>
-              {/* <NotiProvider> */}
+            {/* <NotiProvider> */}
             <LoginPage />
             {/* </NotiProvider> */}
-            </SWRConfig>
           </ThemeProvider>
         </CacheProvider>
       </Provider>
@@ -85,11 +81,9 @@ function MyApp({
       <CacheProvider value={emotionCache}>
         <ThemeProvider theme={theme}>
           <Layout>
-           <SWRConfig value={{fetcher: (url) => axiosClient.get(url), shouldRetryOnError: false}}>
-             {/* <NotiProvider> */}
-             <Component {...pageProps} />
+            {/* <NotiProvider> */}
+            <Component {...pageProps} />
             {/* </NotiProvider> */}
-           </SWRConfig>
           </Layout>
         </ThemeProvider>
       </CacheProvider>

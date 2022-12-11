@@ -17,6 +17,7 @@ import {
   Droppable,
   DropResult,
 } from 'react-beautiful-dnd'
+import useSWR from 'swr'
 import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined'
 import AddBoxOutlinedIcon from '@mui/icons-material/AddBoxOutlined'
 import styled from '@emotion/styled'
@@ -33,6 +34,9 @@ import { getCollectionDoc } from '@/utils/index'
 import { useDispatch } from 'react-redux'
 import { setBoards } from 'redux/features/boardSlice'
 import { useSelector } from 'react-redux'
+import axiosClient from 'api-client/axios-client'
+import axios from 'axios'
+import { useBoard } from '@/hooks/use-board'
 
 const StyledContainer = styled.div`
   position: relative;
@@ -40,64 +44,36 @@ const StyledContainer = styled.div`
 `
 
 export function Sidebar() {
-  const dispatch = useDispatch()
   const theme = useTheme()
   const [user, loading, error] = useAuthState(auth)
-  const [loadFetch, setLoadFetch] = React.useState(false)
   const [signOut, signOutLoading, signOutErr] = useSignOut(auth)
   const router = useRouter()
   const { notiDispatch } = useNotiContext()
-  const [boardsList, setBoardsList] = React.useState<BoardModel[]>([])
   const boards = useSelector((state: any) => state.board.value)
 
-  React.useEffect(() => {
-    const readDoc = async () => {
-      setLoadFetch(true)
-      let arrBoard: BoardModel[] = []
-      // const dataCol = await getDocs(collection(db, "boards"));
-      ;(await getCollectionDoc('boards'))?.forEach((item) => {
-        if (item?.data() && item?.data().userId === user?.uid) {
-          arrBoard = [
-            ...arrBoard,
-            { boardData: item?.data(), boardId: item?.id },
-          ] as BoardModel[]
-        }
-      })
-      setBoardsList(arrBoard)
-      dispatch(setBoards(arrBoard))
-      setLoadFetch(false)
-    }
-    readDoc()
-  }, [user, dispatch])
+  const fetcher = async (url: string) => {
+    return await axiosClient.get(url)
+  }
+  const { data, isLoading, isValidating, error: fetchError, addBoard } = useBoard({url: `/board/${user?.uid}`, fetcher}) 
 
   const addBoardHandle = async () => {
-    await addDoc(collection(db, 'boards'), {
-      _id: generateId(),
-      description: 'This is description',
-      favorite: false,
-      icon: '',
-      title: 'Untitled',
-      userId: user?.uid,
-      sections: [],
+    const genId = generateId()
+    await addBoard('/board',{
+      boardId: genId,
+      boardData: {
+        _id: genId,
+        description: 'This is description',
+        favorite: false,
+        icon: '',
+        title: 'Untitled',
+        userId: user?.uid as string,
+        sections: [],
+      }
     })
-    dispatch(
-      setBoards([
-        ...boards,
-        {
-          _id: generateId(),
-          description: 'This is description',
-          favorite: false,
-          icon: '',
-          title: 'Untitled',
-          userId: user?.uid,
-          sections: [],
-        },
-      ]),
-    )
   }
 
   const onDragEndHandler = async ({ source, destination }: DropResult) => {
-    const newList = [...boardsList]
+    const newList = [...(data as BoardData[])]
     const [removed] = newList.splice(source?.index, 1)
     newList.splice(destination?.index || 0, 0, removed)
 
@@ -123,8 +99,8 @@ export function Sidebar() {
   }
   return (
     <StyledContainer>
-      {(loading || signOutLoading || loadFetch) && (
-        <Loading isLoading={loading || signOutLoading || loadFetch} />
+      {(loading || signOutLoading || isLoading) && (
+        <Loading isLoading={loading || signOutLoading || isLoading} />
       )}
       <List
         disablePadding
@@ -216,7 +192,7 @@ export function Sidebar() {
             </Tooltip>
           </Box>
         </ListItem>
-        {!loadFetch && boardsList && (
+        {!isLoading && (
           <DragDropContext onDragEnd={onDragEndHandler}>
             <Droppable
               key={'list-board-droppable'}
