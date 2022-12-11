@@ -13,7 +13,7 @@ export const sectionSlice = createSlice({
     setSection: (state, action) => {
       state.value = action?.payload;
     },
-    addSection: (state, action) => {
+    addSections: (state, action) => {
       state.value = [...state.value, action.payload];
     },
     updateSection: (state, action) => {
@@ -28,6 +28,6 @@ export const sectionSlice = createSlice({
   },
 });
 
-export const { setSection, addSection, updateSection, removeSection } = sectionSlice.actions;
+export const { setSection, addSections, updateSection, removeSection } = sectionSlice.actions;
 
 export default sectionSlice.reducer;

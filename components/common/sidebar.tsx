@@ -97,6 +97,7 @@ export function Sidebar() {
       }
     })
   }
+  console.log(boards)
   return (
     <StyledContainer>
       {(loading || signOutLoading || isLoading) && (

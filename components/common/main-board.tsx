@@ -22,6 +22,8 @@ import {
 } from 'redux/features/sectionSlice'
 import AddOutlinedIcon from '@mui/icons-material/AddOutlined'
 import { generateId } from '@/utils/generateId'
+import { useSection } from '@/hooks/use-section'
+import axiosClient from 'api-client/axios-client'
 const StyledInputTitle = styled.input`
   width: 100%;
   border: 0;
@@ -109,8 +111,13 @@ export interface IMainBoardProps {
 
 export default function MainBoard({ board }: IMainBoardProps) {
   const [user, loading, error] = useAuthState(auth)
-  const dispatch = useDispatch()
   const sectionArr = useSelector((state: any) => state?.section?.value)
+
+  const fetcher = async (url: string) => {
+    return await axiosClient.get(url)
+  }
+
+  const { data, isLoading, error: fetchError, addSection} = useSection({url: `/section/${board?.boardId}`, fetcher})
   const initialSection = {
     sectionId: generateId(),
     sectionData: {
@@ -118,17 +125,27 @@ export default function MainBoard({ board }: IMainBoardProps) {
       description: 'This is description',
       userId: user?.uid,
       title: 'Untitled',
-      position: sectionArr?.length,
       status: '',
       tasks: [],
     },
   }
-  console.log(sectionArr)
+  console.log(data)
 
   const handleAddSection = async () => {
     const genId = generateId()
-    await setDoc(doc(db, 'section', genId), initialSection)
-    dispatch(addSection(initialSection))
+    // await setDoc(doc(db, 'section', genId), initialSection)
+    // dispatch(addSection(initialSection))
+    await addSection(`/section`,{
+      sectionId: genId,
+      sectionData: {
+        boardId: board?.boardId,
+        description: 'This is description',
+        userId: user?.uid as string,
+        title: 'Untitled',
+        status: '',
+        tasks: [],
+    },
+    })
   }
   return (
     <Box
