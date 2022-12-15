@@ -4,10 +4,11 @@ import { collection, doc, DocumentData, getDoc, getDocs, QueryDocumentSnapshot }
 import * as React from 'react';
 import styled from '@emotion/styled'
 import { Helmet } from '@/component/common';
-import BoardWrapper from '@/component/common/board';
+// import BoardWrapper from '@/component/common/board';
 import { BoardModel, SectionData, SectionModel } from '@/models/board';
 import { useDispatch } from 'react-redux';
 import { setSection } from 'redux/features/sectionSlice';
+import MainBoard from '@/component/common/main-board';
 
 export interface IAppProps {
     board: BoardModel
@@ -33,13 +34,14 @@ export default function BoardPage ({board, id, section}: IAppProps) {
     <StyledContainer>
         <Helmet title='Board' />
       <Sidebar />
-      <BoardWrapper boardData={board} boardId={id} />
+      {/* <BoardWrapper boardData={board} boardId={id} /> */}
+      <MainBoard board={{boardData: board, boardId: id}} />
     </StyledContainer>
   );
 }
 
 export const getServerSideProps = async (context: any) => {
-    let secArr: SectionModel[] = []
+    let secArr: SectionData[] = []
     const boardId = context?.params?.id
     const docRef = doc(db, 'boards', boardId[0])
     const sections = await getDocs(collection(db, 'section'))

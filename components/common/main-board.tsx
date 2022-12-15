@@ -16,7 +16,6 @@ import { useSelector } from 'react-redux'
 import { addDoc, collection, deleteDoc, doc, setDoc } from 'firebase/firestore'
 import { useDispatch } from 'react-redux'
 import {
-  addSection,
   removeSection,
   setSection,
 } from 'redux/features/sectionSlice'
@@ -24,6 +23,7 @@ import AddOutlinedIcon from '@mui/icons-material/AddOutlined'
 import { generateId } from '@/utils/generateId'
 import { useSection } from '@/hooks/use-section'
 import axiosClient from 'api-client/axios-client'
+import { useBoard } from '@/hooks/use-board'
 const StyledInputTitle = styled.input`
   width: 100%;
   border: 0;
@@ -118,23 +118,9 @@ export default function MainBoard({ board }: IMainBoardProps) {
   }
 
   const { data, isLoading, error: fetchError, addSection} = useSection({url: `/section/${board?.boardId}`, fetcher})
-  const initialSection = {
-    sectionId: generateId(),
-    sectionData: {
-      boardId: board?.boardId,
-      description: 'This is description',
-      userId: user?.uid,
-      title: 'Untitled',
-      status: '',
-      tasks: [],
-    },
-  }
-  console.log(data)
-
+  const { deleteBoard } = useBoard({url: `/board/${board?.boardId}`, fetcher})
   const handleAddSection = async () => {
     const genId = generateId()
-    // await setDoc(doc(db, 'section', genId), initialSection)
-    // dispatch(addSection(initialSection))
     await addSection(`/section`,{
       sectionId: genId,
       sectionData: {
@@ -146,6 +132,10 @@ export default function MainBoard({ board }: IMainBoardProps) {
         tasks: [],
     },
     })
+  }
+
+  const deleteBoardHandle = async () => {
+    await deleteBoard(`/board/${board?.boardId}`, board?.boardId)
   }
   return (
     <Box
@@ -166,7 +156,7 @@ export default function MainBoard({ board }: IMainBoardProps) {
         <Button variant="text">
           <StarBorderOutlinedIcon
             sx={{
-              fontSize: '30px',
+              fontSize: '25px',
               color: 'white',
               transition: 'color 0.8s ease in out',
               margin: '0 10px',
@@ -177,10 +167,12 @@ export default function MainBoard({ board }: IMainBoardProps) {
           />
         </Button>
 
-        <Button variant="text">
+        <Button variant="text"
+          onClick={deleteBoardHandle}
+        >
           <DeleteOutlineOutlinedIcon
             sx={{
-              fontSize: '30px',
+              fontSize: '25px',
               color: 'white',
               transition: 'color 0.8s ease in out',
               margin: '0 10px',

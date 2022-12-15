@@ -17,25 +17,19 @@ import {
   Droppable,
   DropResult,
 } from 'react-beautiful-dnd'
-import useSWR from 'swr'
 import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined'
 import AddBoxOutlinedIcon from '@mui/icons-material/AddBoxOutlined'
 import styled from '@emotion/styled'
-import { BoardData, BoardModel } from '@/models/index'
+import { BoardData } from '@/models/index'
 import { useRouter } from 'next/router'
 import { Loading } from './loading'
 import { useAuthState, useSignOut } from 'react-firebase-hooks/auth'
-import { auth, db } from 'config/firebase'
+import { auth } from 'config/firebase'
 import AvatarUser from './avatar'
 import { useNotiContext } from './notification'
-import { collection, addDoc } from 'firebase/firestore'
 import { generateId } from '@/utils/generateId'
-import { getCollectionDoc } from '@/utils/index'
-import { useDispatch } from 'react-redux'
-import { setBoards } from 'redux/features/boardSlice'
 import { useSelector } from 'react-redux'
 import axiosClient from 'api-client/axios-client'
-import axios from 'axios'
 import { useBoard } from '@/hooks/use-board'
 
 const StyledContainer = styled.div`
@@ -97,7 +91,6 @@ export function Sidebar() {
       }
     })
   }
-  console.log(boards)
   return (
     <StyledContainer>
       {(loading || signOutLoading || isLoading) && (
@@ -201,8 +194,8 @@ export function Sidebar() {
             >
               {(provided) => (
                 <div ref={provided.innerRef} {...provided.droppableProps}>
-                  {boards &&
-                    boards?.map((item: BoardData, index: number) => (
+                  {data &&
+                    data?.map((item: BoardData, index: number) => (
                       <Draggable
                         key={item?.boardId}
                         draggableId={item.boardId}
@@ -226,7 +219,7 @@ export function Sidebar() {
                                   : 'transparent'
                               }`,
                               transition: 'background-color 0.3s ease-in-out',
-                              borderBottom: `2px solid ${theme.palette.secondary.main}`,
+                              // borderBottom: `2px solid ${theme.palette.secondary.main}`,
                               ':hover': {
                                 backgroundColor:
                                   'rgba(243, 236, 236, 0.637) !important',
