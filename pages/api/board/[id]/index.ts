@@ -1,6 +1,5 @@
 import { getCollectionDoc } from "@/utils/get-collection-snapshot";
 import { db } from "config/firebase";
-import { deleteDoc, doc } from "firebase/firestore";
 import type { NextApiRequest, NextApiResponse } from "next";
 import { BoardData } from "../../../../models/index";
 // import { getCollectionDoc } from "../../../utils/index";
@@ -17,18 +16,11 @@ export default async function handler(
   if (req.method === "GET") {
     try {
       const { id } = req.query;
-    let arrBoard: BoardData[] = [];
 
-    (await getCollectionDoc("boards"))?.forEach((item) => {
-      if (item?.data() && item?.data()?.userId === id) {
-        arrBoard = [
-          ...arrBoard,
-          { boardData: item?.data(), boardId: item?.id },
-        ] as BoardData[];
-      }
-    });
-
-    res.status(200).json(arrBoard);
+    // res.status(200).json([{
+    //   boardData: {},
+    //   boardId: ''
+    // }]);
     } catch(err) {
       res.status(200).json({
         message: 'Can not get board!'
@@ -37,7 +29,6 @@ export default async function handler(
   } else if (req.method === "DELETE") {
     try {
       const { id } = req.query;
-      await deleteDoc(doc(db, "boards", id as string));
 
       res.status(200).json({
         message: "Delete successfully!",

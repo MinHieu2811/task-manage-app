@@ -5,10 +5,8 @@ import { theme, createEmotionCache } from '@/utils/index'
 import { EmptyLayout } from '@/component/layout/'
 import { AppPropsWithLayout } from '@/models/layout'
 import { Loading } from '@/component/common'
-import { useAuthState } from 'react-firebase-hooks/auth'
 import { auth, db } from 'config/firebase'
 import { useEffect } from 'react'
-import { doc, serverTimestamp, setDoc } from 'firebase/firestore'
 import LoginPage from './login'
 import { NotiProvider } from '@/component/common/notification/noti-context'
 import { Provider } from 'react-redux'
@@ -23,38 +21,36 @@ function MyApp({
 }: AppPropsWithLayout) {
   const Layout = Component.Layout ?? EmptyLayout
 
-  const [loggedInUser, loading, error] = useAuthState(auth)
+  // useEffect(() => {
+  //   const setUserInDb = async () => {
+  //     try {
+  //       await setDoc(
+  //         doc(db, 'users', loggedInUser?.email as string),
+  //         {
+  //           email: loggedInUser?.email,
+  //           lastSeen: serverTimestamp(),
+  //           photoURL: loggedInUser?.photoURL,
+  //         },
+  //         { merge: true },
+  //       )
+  //     } catch (err) {
+  //       console.log(err)
+  //     }
+  //   }
 
-  useEffect(() => {
-    const setUserInDb = async () => {
-      try {
-        await setDoc(
-          doc(db, 'users', loggedInUser?.email as string),
-          {
-            email: loggedInUser?.email,
-            lastSeen: serverTimestamp(),
-            photoURL: loggedInUser?.photoURL,
-          },
-          { merge: true },
-        )
-      } catch (err) {
-        console.log(err)
-      }
-    }
+  //   if (loggedInUser) {
+  //     setUserInDb()
+  //   }
+  // }, [loggedInUser])
 
-    if (loggedInUser) {
-      setUserInDb()
-    }
-  }, [loggedInUser])
-
-  if (loading)
+  if (true)
     return (
       <Provider store={store}>
         <CacheProvider value={emotionCache}>
           <ThemeProvider theme={theme}>
             <EmptyLayout>
               {/* <NotiProvider> */}
-              <Loading isLoading={loading} />
+              <Loading isLoading={true} />
               {/* </NotiProvider> */}
             </EmptyLayout>
           </ThemeProvider>
@@ -62,7 +58,7 @@ function MyApp({
       </Provider>
     )
 
-  if (!loggedInUser)
+  if (!true)
     return (
       <Provider store={store}>
         <CacheProvider value={emotionCache}>

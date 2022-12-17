@@ -1,30 +1,24 @@
 export interface BoardModel {
     _id: string
-    description: string,
-    favorite?: boolean,
-    icon?: string,
-    title: string,
-    userId: string,
-    sections: SectionModel[]
+    description: string
+    position: number
+    favoritePosition: number
+    favorite?: boolean
+    icon?: string
+    title: string
+    userId: string
 }
 
 export interface SectionModel {
     boardId: string
-    description?: string
-    userId: string
     title: string
-    status: string
-    tasks: []
 }
 
 export interface TaskModel {
-    boardId: string
     sectionId: string
     title: string
-    description: string
-    icon: string,
-    userId: string
-    _id: string
+    content: string
+    position: number
 }
 export interface BoardData {
     boardData: BoardModel

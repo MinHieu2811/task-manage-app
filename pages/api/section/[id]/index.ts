@@ -10,15 +10,6 @@ export default async function handler(
     const { id } = req.query;
     let arrSection: SectionData[] = [];
 
-    (await getCollectionDoc("section"))?.forEach((item) => {
-      if (item?.data() && item?.data()?.boardId === id) {
-        arrSection = [
-          ...arrSection,
-          { sectionData: item?.data(), sectionId: item?.id },
-        ] as SectionData[];
-      }
-    });
-
     res.status(200).json(arrSection);
   }
 }

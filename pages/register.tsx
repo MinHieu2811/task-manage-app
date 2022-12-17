@@ -2,7 +2,6 @@ import React from 'react';
 import { Button, Typography, useTheme } from '@mui/material';
 import styled from '@emotion/styled'
 import { MainLayout } from '@/component/layout'
-import { useCreateUserWithEmailAndPassword } from 'react-firebase-hooks/auth'
 import { auth } from 'config/firebase';
 import { useState } from 'react';
 import { TextField } from '@mui/material';
@@ -66,31 +65,25 @@ export default function RegisterPage() {
     const [email, setEmail] = useState<string>('')
     const [password, setPassword] = useState<string>('')
     const { notiDispatch } = useNotiContext()
-    const [
-        createUserWithEmailAndPassword,
-        user,
-        loading,
-        error,] = useCreateUserWithEmailAndPassword(auth)
 
-    const signInEmailHandler = () => {
-        createUserWithEmailAndPassword(email, password)
-        if (error) {
-            notiDispatch({
-                type: 'REMOVE_ALL_AND_ADD',
-                payload: {
-                    content: 'This email already exists',
-                    type: 'is-danger',
-                    removable: true
-                }
-            })
-        }
-    }
+    // const signInEmailHandler = () => {
+    //     if (error) {
+    //         notiDispatch({
+    //             type: 'REMOVE_ALL_AND_ADD',
+    //             payload: {
+    //                 content: 'This email already exists',
+    //                 type: 'is-danger',
+    //                 removable: true
+    //             }
+    //         })
+    //     }
+    // }
     return (
         <MainLayout>
             <NotiProvider>
                 <Helmet title='Login' />
                 <StyledContainer style={{ backgroundColor: `${theme.palette.primary.main}` }}>
-                    <Loading isLoading={loading} />
+                    <Loading isLoading={true} />
                     <StyledLoginContainer color='secondary'>
                         <StyledTypography variant='h2'>Register</StyledTypography>
                         <StyledInputGroup>
@@ -100,7 +93,7 @@ export default function RegisterPage() {
                         <StyledInputGroup>
                             <StyledInput color='secondary' type="password" placeholder='Password' value={password} onChange={(e) => setPassword(e.target.value)} />
                         </StyledInputGroup>
-                        <StyledButton variant="contained" onClick={signInEmailHandler} sx={{ backgroundColor: theme.palette.secondary.main }}>
+                        <StyledButton variant="contained" sx={{ backgroundColor: theme.palette.secondary.main }}>
                             Register
                         </StyledButton>
                         <ButtonBase

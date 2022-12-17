@@ -1,6 +1,5 @@
 import { Sidebar } from '@/component/common/sidebar';
 import { db } from 'config/firebase';
-import { collection, doc, DocumentData, getDoc, getDocs, QueryDocumentSnapshot } from 'firebase/firestore';
 import * as React from 'react';
 import styled from '@emotion/styled'
 import { Helmet } from '@/component/common';
@@ -43,18 +42,8 @@ export default function BoardPage ({board, id, section}: IAppProps) {
 export const getServerSideProps = async (context: any) => {
     let secArr: SectionData[] = []
     const boardId = context?.params?.id
-    const docRef = doc(db, 'boards', boardId[0])
-    const sections = await getDocs(collection(db, 'section'))
-    const board = await getDoc(docRef)
-    sections?.docs?.forEach((item: QueryDocumentSnapshot<DocumentData>) => {
-      if (boardId?.includes(item?.data()?.boardId)) {
-        secArr = [...secArr, {sectionId: item?.id, sectionData: item?.data()}] as SectionData[]
-      }})
+    
     return {
-        props: {
-            board: board?.data(),
-            id: board?.id,
-            section: secArr 
-        }
+        props: {}
     }
 }

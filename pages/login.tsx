@@ -2,8 +2,6 @@ import React from 'react';
 import { Button, Typography, useTheme } from '@mui/material';
 import styled from '@emotion/styled'
 import { MainLayout } from '@/component/layout/index'
-import { useSignInWithEmailAndPassword, useSignInWithGoogle } from 'react-firebase-hooks/auth'
-import { auth } from 'config/firebase';
 import { useState } from 'react';
 import { TextField } from '@mui/material';
 import { ButtonBase } from '@mui/material';
@@ -64,16 +62,14 @@ export default function LoginPage() {
     const theme = useTheme()
     const [email, setEmail] = useState<string>('')
     const [password, setPassword] = useState<string>('')
-    const [signInWithGoogle, _user, _loading, error] = useSignInWithGoogle(auth)
-    const [signInWithEmailAndPassword, _customer, _loadingg, errors] = useSignInWithEmailAndPassword(auth)
     const { notiDispatch } = useNotiContext()
 
     const signInGoogleHandler = () => {
-        signInWithGoogle()
+        console.log('')
     }
 
     const signInEmailHandler = () => {
-        signInWithEmailAndPassword(email, password)
+        console.log(email, password)
     }
     return (
         <MainLayout>
@@ -90,9 +86,6 @@ export default function LoginPage() {
                     </StyledInputGroup>
                     <StyledButton variant="contained" onClick={signInEmailHandler} sx={{backgroundColor: theme.palette.secondary.main}}>
                         Log in 
-                    </StyledButton>
-                    <StyledButton variant="contained" onClick={signInGoogleHandler} sx={{backgroundColor: theme.palette.secondary.main}}>
-                        Sign in with Google
                     </StyledButton>
                     <ButtonBase
                         LinkComponent={Button}
