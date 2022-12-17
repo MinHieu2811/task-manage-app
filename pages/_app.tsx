@@ -13,8 +13,7 @@ import LoginPage from './login'
 import { NotiProvider } from '@/component/common/notification/noti-context'
 import { Provider } from 'react-redux'
 import { store } from 'redux/store'
-import { SWRConfig } from 'swr'
-import axiosClient from 'api-client/axios-client'
+import App from 'next/app'
 const clientSideEmotionCache = createEmotionCache()
 
 function MyApp({
@@ -90,4 +89,10 @@ function MyApp({
     </Provider>
   )
 }
+
+MyApp.getInitialProps = async(ctx: any) => {
+  const appProps = App.getInitialProps && (await App.getInitialProps(ctx))
+  return {...appProps}
+}
+
 export default MyApp

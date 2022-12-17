@@ -21,7 +21,7 @@ export default async function handler(
         message: "Create board successfully!",
       });
     } catch (error) {
-      res.status(200).json({
+      res.status(500).json({
         success: false,
         message: "Create board failed!",
       });

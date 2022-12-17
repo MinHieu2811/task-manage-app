@@ -7,7 +7,7 @@ import { BoardData } from "../../../../models/index";
 
 interface ActionProps {
   message: string
-  success: boolean
+  success?: boolean
 }
 
 export default async function handler(
@@ -15,7 +15,8 @@ export default async function handler(
   res: NextApiResponse<BoardData[] | ActionProps>
 ) {
   if (req.method === "GET") {
-    const { id } = req.query;
+    try {
+      const { id } = req.query;
     let arrBoard: BoardData[] = [];
 
     (await getCollectionDoc("boards"))?.forEach((item) => {
@@ -28,6 +29,11 @@ export default async function handler(
     });
 
     res.status(200).json(arrBoard);
+    } catch(err) {
+      res.status(200).json({
+        message: 'Can not get board!'
+      });
+    }
   } else if (req.method === "DELETE") {
     try {
       const { id } = req.query;
@@ -39,8 +45,8 @@ export default async function handler(
       });
     } catch (error) {
       res.status(404).json({
-        message: "Delete successfully!",
-        success: true,
+        message: "Delete failed!",
+        success: false,
       });
     }
   }
