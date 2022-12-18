@@ -10,7 +10,7 @@ router.get('/', verifyToken, getAllBoard)
 router.put('/', verifyToken, updatePositionBoard)
 router.get('/favorites', verifyToken, getFavouriteBoard)
 router.put('/favorites', verifyToken, updateFavouritePosition)
-router.get(':boardId',validate, verifyToken, getOneBoard)
+router.get('/:boardId',validate, verifyToken, getOneBoard)
 router.put('/:boardId', validate, verifyToken, updateBoard)
 router.delete('/:boardId', validate, verifyToken, deleteBoard)
 

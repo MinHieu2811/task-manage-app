@@ -25,10 +25,10 @@ app.get('/' ,(req, res) => {
     res.send('Hello World');
 })
 
-app.use('/api', authRoute)
-app.use('/api/board', boardRoutes)
-app.use('/api/:boardId/task', taskRoutes)
-app.use('/api/:boardId/section', sectionRoutes)
+app.use('/data', authRoute)
+app.use('/data/board', boardRoutes)
+app.use('/data/:boardId/task', taskRoutes)
+app.use('/data/:boardId/section', sectionRoutes)
 
 app.get('/*', function(req, res, next) {
     res.setHeader('Last-Modified', (new Date()).toUTCString());

@@ -8,6 +8,7 @@ import { ButtonBase } from '@mui/material';
 import { Helmet } from '@/component/common';
 import { Loading } from '@/component/common';
 import { useNotiContext } from '@/component/common/notification';
+import axiosClient from 'api-client/axios-client';
 
 const StyledContainer = styled.div`
     height: 100vh;
@@ -64,12 +65,8 @@ export default function LoginPage() {
     const [password, setPassword] = useState<string>('')
     const { notiDispatch } = useNotiContext()
 
-    const signInGoogleHandler = () => {
-        console.log('')
-    }
-
-    const signInEmailHandler = () => {
-        console.log(email, password)
+    const signInEmailHandler = async () => {
+        await axiosClient.post('/login', {email, password}).then((res) => console.log(res.data))
     }
     return (
         <MainLayout>

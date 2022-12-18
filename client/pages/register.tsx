@@ -2,7 +2,6 @@ import React from 'react';
 import { Button, Typography, useTheme } from '@mui/material';
 import styled from '@emotion/styled'
 import { MainLayout } from '@/component/layout'
-import { auth } from 'config/firebase';
 import { useState } from 'react';
 import { TextField } from '@mui/material';
 import { ButtonBase } from '@mui/material';
@@ -10,6 +9,7 @@ import { Helmet } from '@/component/common';
 import { Loading } from '@/component/common';
 import { useNotiContext } from '@/component/common/notification';
 import { NotiProvider } from '@/component/common/notification/noti-context';
+import axiosClient from 'api-client/axios-client';
 
 const StyledContainer = styled.div`
     height: 100vh;
@@ -64,20 +64,12 @@ export default function RegisterPage() {
     const theme = useTheme()
     const [email, setEmail] = useState<string>('')
     const [password, setPassword] = useState<string>('')
+    const [username, setUserName] = useState<string>('')
     const { notiDispatch } = useNotiContext()
 
-    // const signInEmailHandler = () => {
-    //     if (error) {
-    //         notiDispatch({
-    //             type: 'REMOVE_ALL_AND_ADD',
-    //             payload: {
-    //                 content: 'This email already exists',
-    //                 type: 'is-danger',
-    //                 removable: true
-    //             }
-    //         })
-    //     }
-    // }
+    const registerEmailHandler = async () => {
+        await axiosClient.post('/register', {username, email, password})
+    }
     return (
         <MainLayout>
             <NotiProvider>
@@ -87,13 +79,16 @@ export default function RegisterPage() {
                     <StyledLoginContainer color='secondary'>
                         <StyledTypography variant='h2'>Register</StyledTypography>
                         <StyledInputGroup>
+                            <StyledInput color='secondary' type="username" placeholder='Username' value={username} onChange={(e) => setUserName(e.target.value)} />
+                        </StyledInputGroup>
+                        <StyledInputGroup>
                             <StyledInput color='secondary' type="email" placeholder='Email' value={email} onChange={(e) => setEmail(e.target.value)} />
                         </StyledInputGroup>
 
                         <StyledInputGroup>
                             <StyledInput color='secondary' type="password" placeholder='Password' value={password} onChange={(e) => setPassword(e.target.value)} />
                         </StyledInputGroup>
-                        <StyledButton variant="contained" sx={{ backgroundColor: theme.palette.secondary.main }}>
+                        <StyledButton variant="contained" onClick={registerEmailHandler} sx={{ backgroundColor: theme.palette.secondary.main }}>
                             Register
                         </StyledButton>
                         <ButtonBase

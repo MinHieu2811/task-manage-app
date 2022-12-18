@@ -53,13 +53,10 @@ export const notiReducer = (state: INotiStateItem[], action: NotiAction) => {
 export const NotiProvider = ({ children }: { children: ReactNode }) => {
   const [notiList, notiDispatch] = useReducer(notiReducer, initialState)
   const notiData = { notiList, notiDispatch }
-  const { Portal } = usePortal()
   return (
     <NotiContext.Provider value={notiData}>
       {children}
-      <Portal>
         <Notifications notiList={notiList} />
-      </Portal>
     </NotiContext.Provider>
   )
 }
