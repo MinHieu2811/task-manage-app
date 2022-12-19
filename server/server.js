@@ -25,7 +25,7 @@ app.get('/' ,(req, res) => {
     res.send('Hello World');
 })
 
-app.use('/data', authRoute)
+app.use('/data/auth', authRoute)
 app.use('/data/board', boardRoutes)
 app.use('/data/:boardId/task', taskRoutes)
 app.use('/data/:boardId/section', sectionRoutes)

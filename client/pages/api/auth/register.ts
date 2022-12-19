@@ -23,7 +23,7 @@ export default async function handler(
         // we'll need to intercept the API response.
         // More on that in a bit.
         const pathname = url.parse(req?.url || '')?.pathname
-        const isLogin = pathname === '/api/register'
+        const isLogin = pathname === '/api/auth/register'
         // Get the `auth-token` cookie:
         const cookies = new Cookies(req, res)
         const authToken = cookies.get('auth-token')

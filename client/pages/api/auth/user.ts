@@ -23,7 +23,7 @@ export default async function handler(
         // we'll need to intercept the API response.
         // More on that in a bit.
         const pathname = url.parse(req?.url || '')?.pathname
-        const isLogin = pathname === '/api/login'
+        const isLogin = pathname === '/api/auth/login'
         // Get the `auth-token` cookie:
         const cookies = new Cookies(req, res)
         const authToken = cookies.get('auth-token')
@@ -38,7 +38,7 @@ export default async function handler(
         req.headers.cookie = ''
         // Set auth-token header from cookie:
         if (authToken) {
-            req.headers['auth-token'] = authToken
+            req.headers['authorization'] = `Bearer ${authToken}`
         }
         // In case the request is for login, we need to
         // intercept the API's response. It contains the

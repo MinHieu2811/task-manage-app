@@ -9,6 +9,7 @@ import { Helmet } from '@/component/common';
 import { Loading } from '@/component/common';
 import { useNotiContext } from '@/component/common/notification';
 import axiosClient from 'api-client/axios-client';
+import { useAuth } from '@/hooks/index';
 
 const StyledContainer = styled.div`
     height: 100vh;
@@ -65,8 +66,14 @@ export default function LoginPage() {
     const [password, setPassword] = useState<string>('')
     const { notiDispatch } = useNotiContext()
 
+    const fetcher = async (url: string) => {
+        return await axiosClient.get(url)
+    }
+
+    const { login } = useAuth({url: 'auth/user', fetcher})
+
     const signInEmailHandler = async () => {
-        await axiosClient.post('/login', {email, password}).then((res) => console.log(res.data))
+        await login({email, password})
     }
     return (
         <MainLayout>

@@ -10,6 +10,7 @@ import { Loading } from '@/component/common';
 import { useNotiContext } from '@/component/common/notification';
 import { NotiProvider } from '@/component/common/notification/noti-context';
 import axiosClient from 'api-client/axios-client';
+import { useAuth } from '@/hooks/index';
 
 const StyledContainer = styled.div`
     height: 100vh;
@@ -67,8 +68,14 @@ export default function RegisterPage() {
     const [username, setUserName] = useState<string>('')
     const { notiDispatch } = useNotiContext()
 
+    const fetcher = async (url: string) => {
+        return await axiosClient.get(url)
+    }
+
+    const { register } = useAuth({url: 'auth/user', fetcher})
+
     const registerEmailHandler = async () => {
-        await axiosClient.post('/register', {username, email, password})
+        await register({email, username, password})
     }
     return (
         <MainLayout>
