@@ -21,12 +21,12 @@ export interface TaskModel {
     position: number
 }
 export interface BoardData {
-    boardData: BoardModel
-    boardId: string
+    data: BoardModel[]
+    success?: string
 }
 
 export interface SectionData {
-    sectionData: SectionModel
+    sectionData: SectionModel[]
     sectionId: string
 }
 

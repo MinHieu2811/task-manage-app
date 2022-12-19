@@ -1,8 +1,6 @@
-import { getCollectionDoc } from "@/utils/get-collection-snapshot";
-import { db } from "config/firebase";
 import type { NextApiRequest, NextApiResponse } from "next";
 import { BoardData } from "../../../../models/index";
-// import { getCollectionDoc } from "../../../utils/index";
+import axios from "axios";
 
 interface ActionProps {
   message: string
@@ -17,10 +15,9 @@ export default async function handler(
     try {
       const { id } = req.query;
 
-    // res.status(200).json([{
-    //   boardData: {},
-    //   boardId: ''
-    // }]);
+      const fetchBoard = await axios.get(`${process.env.BE_URL}/board/${id}`).then((res) => res.data)
+
+    res.status(200).json(fetchBoard);
     } catch(err) {
       res.status(200).json({
         message: 'Can not get board!'
