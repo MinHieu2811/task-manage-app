@@ -16,11 +16,6 @@ const registerHandler = asyncHandler(async (req, res) => {
     if (user) {
         res.status(201)
         res.json({
-            user: {
-                _id: user.id,
-            username: user.username,
-            email: user.email,
-            }, 
             access_token: generateToken(user._id),
             success: true,
             message: 'Welcome !'
@@ -36,12 +31,7 @@ const loginHandler = asyncHandler(async (req, res) => {
 
     const user = await User.findOne({ email });
     if (user && (await user.matchPassword(password))) {
-        res.json({
-            user: {
-                _id: user.id,
-                username: user.username,
-                email: user.email,
-            },
+        res.status(200).json({
             access_token: generateToken(user._id),
             success: true,
             message: 'Login successfully!'
@@ -52,4 +42,15 @@ const loginHandler = asyncHandler(async (req, res) => {
     }
 })
 
-export { registerHandler, loginHandler }
+const getUserInfo = asyncHandler(async(req, res) => {
+    const { email, username } = req.user
+
+    if(!email && !username) {
+        res.status(401)
+        throw new Error('Can not get user info!')
+    }
+
+    res.status(200).json({email, username})
+})
+
+export { registerHandler, loginHandler, getUserInfo }
