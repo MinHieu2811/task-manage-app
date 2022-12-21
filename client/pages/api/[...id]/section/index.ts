@@ -1,21 +1,15 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { BoardData } from "../../../../models/index";
-import axios from "axios";
+import { SectionData } from "../../../../models/index";
 import url from 'url'
-import Cookies from "cookies";
-import httpProxy from "http-proxy";
+import Cookies from "cookies"
+import httpProxy from 'http-proxy'
 
-interface ActionProps {
-  message: string
-  success?: boolean
-}
-
-const proxy = httpProxy.createProxyServer();
-const API_URL = process.env.BE_URL;
+const proxy = httpProxy.createProxyServer()
+const API_URL = process?.env?.BE_URL
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<BoardData[] | ActionProps>
+  res: NextApiResponse<SectionData[]>
 ) {
   if (req.method === "GET") {
     return new Promise<void>((resolve, reject) => {
@@ -63,19 +57,5 @@ export default async function handler(
         });
       }
     });
-  } else if (req.method === "DELETE") {
-    try {
-      const { id } = req.query;
-
-      res.status(200).json({
-        message: "Delete successfully!",
-        success: true,
-      });
-    } catch (error) {
-      res.status(404).json({
-        message: "Delete failed!",
-        success: false,
-      });
-    }
   }
 }

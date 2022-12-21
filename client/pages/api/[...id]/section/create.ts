@@ -1,5 +1,4 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { db } from "../../../config/firebase";
 export interface ApiStatus {
   success: boolean;
   message: string;

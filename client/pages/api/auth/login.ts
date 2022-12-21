@@ -84,7 +84,7 @@ export default async function handler(
           cookies.set("auth-token", access_token, {
             httpOnly: true,
             sameSite: "lax",
-            maxAge: 8 * 60 * 60 * 60,
+            maxAge: 8 * 60 * 60 * 1000,
           });
           // Our response to the client won't contain
           // the actual authToken. This way the auth token

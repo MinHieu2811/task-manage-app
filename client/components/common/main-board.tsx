@@ -1,4 +1,4 @@
-import { BoardData, SectionData, TaskData } from '@/models/board'
+import { BoardData, BoardModel, SectionData, TaskData } from '@/models/board'
 import { Box, Button, Typography } from '@mui/material'
 import * as React from 'react'
 import StarBorderOutlinedIcon from '@mui/icons-material/StarBorderOutlined'
@@ -10,11 +10,7 @@ import {
   DropResult,
 } from 'react-beautiful-dnd'
 import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined'
-import { useAuthState } from 'react-firebase-hooks/auth'
-import { auth, db } from 'config/firebase'
-import { useSelector } from 'react-redux'
-import { addDoc, collection, deleteDoc, doc, setDoc } from 'firebase/firestore'
-import { useDispatch } from 'react-redux'
+import { useSelector, useDispatch } from 'react-redux'
 import {
   removeSection,
   setSection,
@@ -106,37 +102,38 @@ const StyledTask = styled.div`
 `
 
 export interface IMainBoardProps {
-  board: BoardData
+  board: BoardModel
 }
 
 export default function MainBoard({ board }: IMainBoardProps) {
-  const [user, loading, error] = useAuthState(auth)
+  console.log(board)
   const sectionArr = useSelector((state: any) => state?.section?.value)
 
   const fetcher = async (url: string) => {
     return await axiosClient.get(url)
   }
 
-  const { data, isLoading, error: fetchError, addSection} = useSection({url: `/section/${board?.boardId}`, fetcher})
-  const { deleteBoard } = useBoard({url: `/board/${board?.boardId}`, fetcher})
-  const handleAddSection = async () => {
-    const genId = generateId()
-    await addSection(`/section`,{
-      sectionId: genId,
-      sectionData: {
-        boardId: board?.boardId,
-        description: 'This is description',
-        userId: user?.uid as string,
-        title: 'Untitled',
-        status: '',
-        tasks: [],
-    },
-    })
-  }
+  const { data, isLoading, error: fetchError, addSection} = useSection({url: `board/${board?._id}/section`, fetcher})
+  console.log(data)
+  // const { deleteBoard } = useBoard({url: `/board/${board?.boardId}`, fetcher})
+  // const handleAddSection = async () => {
+  //   const genId = generateId()
+  //   await addSection(`/section`,{
+  //     sectionId: genId,
+  //     sectionData: {
+  //       boardId: board?.boardId,
+  //       description: 'This is description',
+  //       userId: user?.uid as string,
+  //       title: 'Untitled',
+  //       status: '',
+  //       tasks: [],
+  //   },
+  //   })
+  // }
 
-  const deleteBoardHandle = async () => {
-    await deleteBoard(`/board/${board?.boardId}`, board?.boardId)
-  }
+  // const deleteBoardHandle = async () => {
+  //   await deleteBoard(`/board/${board?.boardId}`, board?.boardId)
+  // }
   return (
     <Box
       sx={{
@@ -167,9 +164,7 @@ export default function MainBoard({ board }: IMainBoardProps) {
           />
         </Button>
 
-        <Button variant="text"
-          onClick={deleteBoardHandle}
-        >
+        <Button variant="text">
           <DeleteOutlineOutlinedIcon
             sx={{
               fontSize: '25px',
@@ -183,10 +178,10 @@ export default function MainBoard({ board }: IMainBoardProps) {
           />
         </Button>
       </Box>
-      <StyledInputTitle name="title" placeholder={board?.boardData?.title} />
+      <StyledInputTitle name="title" placeholder={`${board?.icon} ${board?.title}`} />
       <StyledInputDesc
         name="desc"
-        placeholder={board?.boardData?.description}
+        placeholder={board?.description}
       />
       <Box
         sx={{
@@ -199,7 +194,6 @@ export default function MainBoard({ board }: IMainBoardProps) {
         <Button
           variant="text"
           sx={{ color: 'white', fontSize: '1rem' }}
-          onClick={handleAddSection}
         >
           Add sections
         </Button>
@@ -208,7 +202,7 @@ export default function MainBoard({ board }: IMainBoardProps) {
         </Typography>
       </Box>
       <StyledLine />
-      <StyledSectionsWrapper>
+      {/* <StyledSectionsWrapper>
         {sectionArr.length > 0 ? (
           sectionArr?.map((item: SectionData) => (
             <div key={item?.sectionId}>
@@ -221,7 +215,7 @@ export default function MainBoard({ board }: IMainBoardProps) {
         ) : (
           <></>
         )}
-      </StyledSectionsWrapper>
+      </StyledSectionsWrapper> */}
     </Box>
   )
 }
@@ -229,25 +223,25 @@ export default function MainBoard({ board }: IMainBoardProps) {
 function Section({ sectionId, sectionData }: SectionData) {
   const dispatch = useDispatch()
   const handleDelete = async () => {
-    await deleteDoc(doc(db, 'section', sectionId))
+    // await deleteDoc(doc(db, 'section', sectionId))
     dispatch(removeSection(sectionId))
   }
 
-  const onDragEndHandler = async ({ source, destination }: DropResult) => {
-    const newList = [...sectionData?.tasks]
-    const [removed] = newList.splice(source?.index, 1)
-    newList.splice(destination?.index || 0, 0, removed)
+  // const onDragEndHandler = async ({ source, destination }: DropResult) => {
+  //   const newList = [...sectionData?.tasks]
+  //   const [removed] = newList.splice(source?.index, 1)
+  //   newList.splice(destination?.index || 0, 0, removed)
 
-    try {
-      //   await boardApi.updatePosition({ boards: newList })
-    } catch (err) {
-      console.log(err)
-    }
-  }
+  //   try {
+  //     //   await boardApi.updatePosition({ boards: newList })
+  //   } catch (err) {
+  //     console.log(err)
+  //   }
+  // }
   return (
     <StyledSection>
       <StyledHeaderSection>
-        <StyledTitleSection>{sectionData?.title}</StyledTitleSection>
+        <StyledTitleSection>{''}</StyledTitleSection>
         <Box sx={{ display: 'flex' }}>
           <AddOutlinedIcon
             sx={{
@@ -276,7 +270,7 @@ function Section({ sectionId, sectionData }: SectionData) {
           />
         </Box>
       </StyledHeaderSection>
-      <DragDropContext onDragEnd={onDragEndHandler}>
+      {/* <DragDropContext onDragEnd={onDragEndHandler}>
         <Droppable
           key={'list-board-droppable'}
           droppableId={'list-board-droppable'}
@@ -298,7 +292,7 @@ function Section({ sectionId, sectionData }: SectionData) {
             </div>
           )}
         </Droppable>
-      </DragDropContext>
+      </DragDropContext> */}
     </StyledSection>
   )
 }
