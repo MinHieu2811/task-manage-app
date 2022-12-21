@@ -2,8 +2,6 @@ import httpProxy from "http-proxy";
 import Cookies from "cookies";
 import url from "url";
 import { NextApiRequest, NextApiResponse } from "next";
-import { IRON_OPTIONS, withSessionRoute } from "@/utils/withIronSession";
-import { withIronSessionApiRoute } from "iron-session/next/dist";
 // Get the actual API_URL as an environment variable. For real
 // applications, you might want to get it from 'next/config' instead.
 const API_URL = process.env.BE_URL;
@@ -14,9 +12,8 @@ export const config = {
     bodyParser: false,
   },
 };
-export default withIronSessionApiRoute(handler, IRON_OPTIONS)
 
-async function handler(
+export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
@@ -31,8 +28,6 @@ async function handler(
     // Get the `auth-token` cookie:
     const cookies = new Cookies(req, res);
     cookies.set("auth-token", '')
-
-    req.session.destroy()
     res.status(200).json({
         message: 'Logout successfully!',
         success: true

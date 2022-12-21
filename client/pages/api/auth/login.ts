@@ -2,8 +2,6 @@ import httpProxy from "http-proxy";
 import Cookies from "cookies";
 import url from "url";
 import { NextApiRequest, NextApiResponse } from "next";
-import { IRON_OPTIONS, withSessionRoute } from "@/utils/withIronSession";
-import { withIronSessionApiRoute } from "iron-session/next/dist";
 // Get the actual API_URL as an environment variable. For real
 // applications, you might want to get it from 'next/config' instead.
 const API_URL = process.env.BE_URL;
@@ -14,9 +12,8 @@ export const config = {
     bodyParser: false,
   },
 };
-export default withIronSessionApiRoute(handler, IRON_OPTIONS)
 
-async function handler(
+export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
@@ -80,13 +77,6 @@ async function handler(
           // Extract the authToken from API's response:
           const { access_token, user, success, message } =
             JSON.parse(apiResponseBody);
-
-          req.session.user = {
-            id: user?._id,
-            authenticated: true,
-          };
-
-          await req?.session?.save();
           // Set the authToken as an HTTP-only cookie.
           // We'll also set the SameSite attribute to
           // 'lax' for some additional CSRF protection.
@@ -94,7 +84,7 @@ async function handler(
           cookies.set("auth-token", access_token, {
             httpOnly: true,
             sameSite: "lax",
-            maxAge: 8 * 60 * 60,
+            maxAge: 8 * 60 * 60 * 60,
           });
           // Our response to the client won't contain
           // the actual authToken. This way the auth token
