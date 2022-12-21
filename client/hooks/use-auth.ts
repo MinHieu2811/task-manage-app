@@ -17,7 +17,7 @@ interface useAuthRes {
 
 interface useAuthProps<T> {
     url: string,
-    fetcher: (url: string) => Promise<AxiosResponse<any>>,
+    fetcher: (url: string) => Promise<AxiosResponse<T>>,
     options?: Partial<PublicConfiguration>
 }
 
