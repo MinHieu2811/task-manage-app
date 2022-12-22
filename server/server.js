@@ -28,7 +28,7 @@ app.get('/' ,(req, res) => {
 app.use('/data/auth', authRoute)
 app.use('/data/board', boardRoutes)
 app.use('/data/board/:boardId/task', taskRoutes)
-app.use('/data/board/:boardId/section', sectionRoutes)
+app.use('/data/section', sectionRoutes)
 
 app.get('/*', function(req, res, next) {
     res.setHeader('Last-Modified', (new Date()).toUTCString());

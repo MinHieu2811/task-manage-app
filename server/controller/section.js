@@ -4,8 +4,8 @@ import asyncHandler from 'express-async-handler'
 
 const createSection = asyncHandler(async (req, res) => {
     try {
-        const { boardId } = req.params
-        const section = await Section.create({ board: boardId})
+        const { boardId } = req.body
+        const section = await Section.create({ board: boardId, title: 'Untitled'})
         section._doc.tasks = []
         res.status(201).json({
             data: section,

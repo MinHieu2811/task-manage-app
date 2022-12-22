@@ -97,7 +97,7 @@ const StyledTask = styled.div`
   padding: 10px;
   font-size: 1rem;
   color: white;
-  background-color: #2f2752;
+  background-color: #1c1b22;
   margin: 5px 0px;
 `
 
@@ -106,30 +106,17 @@ export interface IMainBoardProps {
 }
 
 export default function MainBoard({ board }: IMainBoardProps) {
-  console.log(board)
   const sectionArr = useSelector((state: any) => state?.section?.value)
 
   const fetcher = async (url: string) => {
     return await axiosClient.get(url)
   }
 
-  const { data, isLoading, error: fetchError, addSection} = useSection({url: `board/${board?._id}/section`, fetcher})
-  console.log(data)
+  const { data, isLoading, error: fetchError, addSection} = useSection({url: `board/${board?._id}`, fetcher})
   // const { deleteBoard } = useBoard({url: `/board/${board?.boardId}`, fetcher})
-  // const handleAddSection = async () => {
-  //   const genId = generateId()
-  //   await addSection(`/section`,{
-  //     sectionId: genId,
-  //     sectionData: {
-  //       boardId: board?.boardId,
-  //       description: 'This is description',
-  //       userId: user?.uid as string,
-  //       title: 'Untitled',
-  //       status: '',
-  //       tasks: [],
-  //   },
-  //   })
-  // }
+  const handleAddSection = async () => {
+    await addSection({boardId: board?._id})
+  }
 
   // const deleteBoardHandle = async () => {
   //   await deleteBoard(`/board/${board?.boardId}`, board?.boardId)
@@ -139,7 +126,7 @@ export default function MainBoard({ board }: IMainBoardProps) {
       sx={{
         width: 'calc(100vw - 250px)',
         height: '100vh',
-        backgroundColor: '#160e36',
+        backgroundColor: '#1c1b22',
       }}
     >
       <Box
@@ -194,6 +181,7 @@ export default function MainBoard({ board }: IMainBoardProps) {
         <Button
           variant="text"
           sx={{ color: 'white', fontSize: '1rem' }}
+          onClick={handleAddSection}
         >
           Add sections
         </Button>

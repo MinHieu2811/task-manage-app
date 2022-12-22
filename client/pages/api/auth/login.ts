@@ -20,31 +20,13 @@ export default async function handler(
   // Return a Promise to let Next.js know when we're done
   // processing the request:
   return new Promise<void>((resolve, reject) => {
-    // In case the current API request is for logging in,
-    // we'll need to intercept the API response.
-    // More on that in a bit.
     const pathname = url.parse(req?.url || "")?.pathname;
     const isLogin = pathname === "/api/auth/login";
-    // Get the `auth-token` cookie:
-    const cookies = new Cookies(req, res);
-    const authToken = cookies.get("auth-token");
-    // Rewrite the URL: strip out the leading '/api'.
-    // For example, '/api/login' would become '/login'.
-    // ️You might want to adjust this depending
-    // on the base path of your API.
 
     req.url = req.url?.replace(/^\/api/, "data");
 
     // Don't forward cookies to the API:
     req.headers.cookie = "";
-    // Set auth-token header from cookie:
-    if (authToken) {
-      req.headers["auth-token"] = authToken;
-    }
-    // In case the request is for login, we need to
-    // intercept the API's response. It contains the
-    // auth token that we want to strip out and set
-    // as an HTTP-only cookie.
     if (isLogin) {
       proxy.once("proxyRes", interceptLoginResponse);
     }

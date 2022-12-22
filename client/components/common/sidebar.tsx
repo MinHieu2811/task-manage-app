@@ -20,17 +20,15 @@ import {
 import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined'
 import AddBoxOutlinedIcon from '@mui/icons-material/AddBoxOutlined'
 import styled from '@emotion/styled'
-import { BoardData } from '@/models/index'
+import { BoardData, BoardModel } from '@/models/index'
 import { useRouter } from 'next/router'
 import { Loading } from './loading'
-import { useAuthState, useSignOut } from 'react-firebase-hooks/auth'
-import { auth } from 'config/firebase'
-import AvatarUser from './avatar'
 import { useNotiContext } from './notification'
 import { generateId } from '@/utils/generateId'
 import { useSelector } from 'react-redux'
 import axiosClient from 'api-client/axios-client'
 import { useBoard } from '@/hooks/use-board'
+import { AxiosResponse } from 'axios'
 
 const StyledContainer = styled.div`
   position: relative;
@@ -39,35 +37,32 @@ const StyledContainer = styled.div`
 
 export function Sidebar() {
   const theme = useTheme()
-  const [user, loading, error] = useAuthState(auth)
-  const [signOut, signOutLoading, signOutErr] = useSignOut(auth)
   const router = useRouter()
   const { notiDispatch } = useNotiContext()
   const boards = useSelector((state: any) => state.board.value)
 
-  const fetcher = async (url: string) => {
+  const fetcher = async (url: string): Promise<AxiosResponse<BoardData>> => {
     return await axiosClient.get(url)
   }
-  const { data, isLoading, isValidating, error: fetchError, addBoard } = useBoard({url: `/board/${user?.uid}`, fetcher}) 
+  const { dataRes, isLoading, isValidating, error: fetchError, addBoard } = useBoard({url: `/board`, fetcher}) 
 
   const addBoardHandle = async () => {
-    const genId = generateId()
-    await addBoard('/board',{
-      boardId: genId,
-      boardData: {
-        _id: genId,
-        description: 'This is description',
-        favorite: false,
-        icon: '',
-        title: 'Untitled',
-        userId: user?.uid as string,
-        sections: [],
-      }
-    })
+    // const genId = generateId()
+    // await addBoard('/board',{
+    //   boardId: genId,
+    //   boardData: {
+    //     _id: genId,
+    //     description: 'This is description',
+    //     favorite: false,
+    //     icon: '',
+    //     title: 'Untitled',
+    //     userId: '',
+    //   }
+    // })
   }
 
   const onDragEndHandler = async ({ source, destination }: DropResult) => {
-    const newList = [...(data as BoardData[])]
+    const newList = [...(dataRes?.data as BoardModel[])]
     const [removed] = newList.splice(source?.index, 1)
     newList.splice(destination?.index || 0, 0, removed)
 
@@ -79,30 +74,30 @@ export function Sidebar() {
   }
 
   const handleSignOut = async () => {
-    await signOut().then(() => {
-      if (!signOutErr) {
-        notiDispatch({
-          type: 'REMOVE_ALL_AND_ADD',
-          payload: {
-            content: 'Sign out successfully!',
-            type: 'is-info',
-          },
-        })
-      }
-    })
+    // await signOut().then(() => {
+    //   if (!signOutErr) {
+    //     notiDispatch({
+    //       type: 'REMOVE_ALL_AND_ADD',
+    //       payload: {
+    //         content: 'Sign out successfully!',
+    //         type: 'is-info',
+    //       },
+    //     })
+    //   }
+    // })
   }
   return (
     <StyledContainer>
-      {(loading || signOutLoading || isLoading) && (
-        <Loading isLoading={loading || signOutLoading || isLoading} />
+      {(isLoading) && (
+        <Loading isLoading={isLoading} />
       )}
       <List
         disablePadding
         sx={{
           width: 250,
           height: '100vh',
-          backgroundColor: '#160e36',
-          borderRight: '3px solid green',
+          backgroundColor: '#1c1b22',
+          borderRight: '2px solid green',
         }}
       >
         <ListItem>
@@ -121,16 +116,12 @@ export function Sidebar() {
                 justifyContent: 'flex-start',
               }}
             >
-              <AvatarUser
-                photoURL={user?.photoURL || ''}
-                displayName={user?.displayName || ''}
-              />
               <Typography
                 variant="body2"
                 fontWeight="700"
                 style={{ color: 'white' }}
               >
-                {user?.displayName || ''}
+                {''}
               </Typography>
             </Box>
             <Tooltip title="Logout">
@@ -194,11 +185,11 @@ export function Sidebar() {
             >
               {(provided) => (
                 <div ref={provided.innerRef} {...provided.droppableProps}>
-                  {data &&
-                    data?.map((item: BoardData, index: number) => (
+                  {dataRes &&
+                    dataRes?.data?.map((item: BoardModel, index: number) => (
                       <Draggable
-                        key={item?.boardId}
-                        draggableId={item.boardId}
+                        key={item?._id}
+                        draggableId={item._id}
                         index={index}
                       >
                         {(provided, snapshot) => (
@@ -207,14 +198,14 @@ export function Sidebar() {
                             {...provided.dragHandleProps}
                             {...provided.draggableProps}
                             selected={router?.query?.id?.includes(
-                              item?.boardId,
+                              item?._id,
                             )}
                             component={Link}
-                            href={`/boards/${item.boardId}`}
+                            href={`/boards/${item._id}`}
                             sx={{
                               pl: '20px',
                               backgroundColor: `${
-                                router?.query?.id?.includes(item?.boardId)
+                                router?.query?.id?.includes(item?._id)
                                   ? `${theme?.palette?.secondary?.main} !important`
                                   : 'transparent'
                               }`,
@@ -238,7 +229,7 @@ export function Sidebar() {
                                 textOverflow: 'ellipsis',
                               }}
                             >
-                              {item?.boardData?.icon} {item?.boardData?.title}
+                              {item?.icon} {item?.title}
                             </Typography>
                           </ListItemButton>
                         )}

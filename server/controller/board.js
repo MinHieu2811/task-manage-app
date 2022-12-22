@@ -64,7 +64,9 @@ const getOneBoard = asyncHandler(async (req, res) => {
         const { boardId } = req.params
 
         const board = await Board.findOne({ user: req.user._id, _id: boardId })
-        if (!boardId) return res.status(404).json('Board not found')
+        if (!boardId) {
+            return res.status(404).json('Board not found')
+        }
         const sections = await Section.find({ board: boardId })
         for (const section of sections) {
             const tasks = await Task.find({ section: section.id }).populate('section').sort('-position')

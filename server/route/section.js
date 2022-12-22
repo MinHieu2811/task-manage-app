@@ -5,7 +5,7 @@ import { validate } from '../middleware/validation.js'
 
 const router = express.Router()
 
-router.post('/', validate, verifyToken, createSection)
+router.post('/create', validate, verifyToken, createSection)
 router.put('/:sectionId', validate, verifyToken, updateSection)
 router.delete('/:sectionId', validate, verifyToken, deleteSection)
 
