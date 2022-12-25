@@ -1,12 +1,12 @@
 export interface BoardModel {
-    _id: string
-    description: string
-    position: number
-    favoritePosition: number
+    _id?: string
+    description?: string
+    position?: number
+    favoritePosition?: number
     favorite?: boolean
     icon?: string
-    title: string
-    userId: string
+    title?: string
+    userId?: string
 }
 
 export interface SectionModel {

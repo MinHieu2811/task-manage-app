@@ -10,6 +10,7 @@ import { Loading } from '@/component/common';
 import { useNotiContext } from '@/component/common/notification';
 import axiosClient from 'api-client/axios-client';
 import { useAuth } from '@/hooks/index';
+import { useRouter } from 'next/router';
 
 const StyledContainer = styled.div`
     height: 100vh;
@@ -62,6 +63,7 @@ const StyledButton = styled(Button)`
 
 export default function LoginPage() {
     const theme = useTheme()
+    const router = useRouter()
     const [email, setEmail] = useState<string>('')
     const [password, setPassword] = useState<string>('')
     const { notiDispatch } = useNotiContext()
@@ -70,10 +72,10 @@ export default function LoginPage() {
         return await axiosClient.get(url)
     }
 
-    const { login } = useAuth({url: 'auth/user', fetcher})
+    const { login } = useAuth({url: 'auth/user', fetcher, options: {shouldRetryOnError: false}}, '/', true)
 
     const signInEmailHandler = async () => {
-        await login({email, password})
+        await login({email, password}, router.replace('/'))
     }
     return (
         <MainLayout>

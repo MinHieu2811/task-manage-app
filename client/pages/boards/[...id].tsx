@@ -10,9 +10,11 @@ import MainBoard from '@/component/common/main-board';
 import axios, { AxiosRequestConfig } from 'axios';
 import { GetServerSidePropsContext } from 'next';
 import Cookies from 'cookies';
+import { validateToken } from '@/utils/sessions';
 
 export interface IAppProps {
-    resBoard: any
+    data: BoardModel
+    success: boolean
 }
 
 const StyledContainer = styled.div`
@@ -21,30 +23,48 @@ const StyledContainer = styled.div`
     align-items: center;
 `
 
-export default function BoardPage ({resBoard}: IAppProps) {
-  console.log('board', resBoard?.data)
+export default function BoardPage ({data}: IAppProps) {
   return (
     <StyledContainer>
         <Helmet title='Board' />
       <Sidebar />
       {/* <BoardWrapper boardData={board} boardId={id} /> */}
-      <MainBoard board={resBoard?.data} />
+      <MainBoard board={data} />
     </StyledContainer>
   );
 }
 
 export const getServerSideProps = async (context: GetServerSidePropsContext) => {
   const boardId = context?.params?.id as string[]
+  console.log(boardId)
   const cookies = new Cookies(context?.req, context?.res)
+  const authCookie = cookies?.get('auth-token')
 
   const config: AxiosRequestConfig = {
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${cookies?.get('auth-token')}`
+      'Authorization': `Bearer ${authCookie}`
     },
   }
-  const resBoard = await axios.get(`http://localhost:3000/api/board/${boardId[0]}`, config).then((res) => res?.data)
-  return {
-    props: {resBoard}
+  if(authCookie && validateToken(authCookie || '')) {
+    let resBoard: IAppProps = {
+      data: {},
+      success: false
+    }
+    const res = await axios.get(`http://localhost:3000/api/board/${boardId[0]}`, config).then((res) => res?.data)
+      resBoard['data'] = res?.data
+      resBoard['success'] = res?.success
+
+      return {
+        props: resBoard
+      }
+    } else {
+      return {
+        redirect: {
+          permanent: false,
+          destination: '/login',
+        },
+        props: {},
+      }
   }
 }

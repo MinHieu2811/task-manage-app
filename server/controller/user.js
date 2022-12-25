@@ -44,13 +44,17 @@ const loginHandler = asyncHandler(async (req, res) => {
 
 const getUserInfo = asyncHandler(async(req, res) => {
     const { email, username } = req.user
-
-    if(!email && !username) {
+   
+    const userInfo = await User.findOne({email: email})
+    if(!userInfo) {
         res.status(401)
         throw new Error('Can not get user info!')
     }
-
-    res.status(200).json({email, username})
+    res.status(200).json({
+        _id: userInfo._id,
+        email: userInfo.email,
+        username: userInfo.username
+    })
 })
 
 export { registerHandler, loginHandler, getUserInfo }

@@ -1,6 +1,9 @@
 import httpProxy from 'http-proxy'
 import Cookies from 'cookies'
 import url from 'url'
+import { User } from '@/models/user'
+import { sessionOptions, validateToken } from '@/utils/sessions'
+import { withIronSessionApiRoute } from 'iron-session/next'
 import { NextApiRequest, NextApiResponse } from 'next'
 // Get the actual API_URL as an environment variable. For real
 // applications, you might want to get it from 'next/config' instead.
@@ -12,7 +15,11 @@ export const config = {
         bodyParser: false
     }
 }
-export default async function handler(
+interface UserAuthen {
+    user: User,
+    isLoggedIn: boolean
+}
+async function handler(
     req: NextApiRequest, 
     res: NextApiResponse
     ) {
@@ -31,7 +38,9 @@ export default async function handler(
         if (authToken) {
             req.headers['authorization'] = `Bearer ${authToken}`
         }
-        proxy.once('proxyRes', interceptLoginResponse)
+        if (isLogin) {
+            proxy.once('proxyRes', (proxyRes) => interceptLoginResponse(proxyRes, req, res))
+        }
         // Don't forget to handle errors:
         proxy.once('error', reject)
         // Forward the request to the API
@@ -40,18 +49,41 @@ export default async function handler(
             autoRewrite: false,
             selfHandleResponse: isLogin
         })
-        function interceptLoginResponse(proxyRes: any, req: any, res: any) {
+        function interceptLoginResponse(proxyRes?: any, req?: NextApiRequest, res?: NextApiResponse) {
             // Read the API's response body from
             // the stream:
             let apiResponseBody = ''
             proxyRes.on('data', (chunk: any) => {
                 apiResponseBody += chunk
             })
-            proxyRes.on('end', () => {
+            proxyRes.on('end', async () => {
                 try {
-                    const { email, username } = JSON.parse(apiResponseBody)
-                    res.status(200).json({ email, username })
-                    resolve()
+                    if(validateToken(authToken || '')) {
+                        const { _id, email, username } = JSON.parse(apiResponseBody)
+                        if(req?.session && _id && email && username) {
+                            req.session.user = {
+                                email,
+                                username,
+                                id: _id
+                            }
+                        }
+
+                        await req?.session.save()
+                        res?.status(200).json({
+                            user: {
+                                _id,
+                                email,
+                                username
+                            },
+                            isLoggedIn: true
+                        })
+                        resolve()
+                    } else {
+                        res?.status(400).json({
+                            message: 'Please login!',
+                            success: false
+                        })
+                    }
                 } catch (err) {
                     reject(err)
                 }
@@ -59,3 +91,4 @@ export default async function handler(
         }
     })
 }
+export default withIronSessionApiRoute(handler, sessionOptions)

@@ -4,6 +4,8 @@ import useSWR from 'swr'
 import { PublicConfiguration } from 'swr/_internal'
 import { BoardData, UserLogin, UserRegister } from '@/models/index'
 import { User } from '@/models/index'
+import { useEffect } from 'react'
+import { useRouter } from 'next/router'
 
 interface useAuthRes {
     data: User | undefined | unknown
@@ -11,8 +13,8 @@ interface useAuthRes {
     isLoading: boolean
     error: AxiosError
     getUser: (url: string) => Promise<AxiosResponse<User>>
-    register: (userRegister: UserRegister) => Promise<AxiosResponse<void>>
-    login: (userLogin: UserLogin) => Promise<AxiosResponse<void>>
+    register: (userRegister: UserRegister, fn?: Promise<boolean>) => Promise<AxiosResponse<void>>
+    login: (userLogin: UserLogin, fn?: Promise<boolean>) => Promise<AxiosResponse<void>>
 }
 
 interface useAuthProps<T> {
@@ -21,17 +23,33 @@ interface useAuthProps<T> {
     options?: Partial<PublicConfiguration>
 }
 
-export const useAuth = ({url, fetcher, options}: useAuthProps<BoardData>): useAuthRes => {
+export const useAuth = ({url, fetcher, options}: useAuthProps<User>, redirectTo: string = '', redirectIfFound: boolean = false): useAuthRes => {
+    const router = useRouter()
     const { data, isLoading, isValidating, error, mutate } = useSWR(url, fetcher, options)
 
-
-    const login = async (user: UserLogin) => {
-        const res = await (await axiosClient.post(`/auth/login`, user)).data
-        res?.success && mutate()
+    useEffect(() => {
+      if(!redirectTo || !data) return
+      if (
+        (redirectTo && !redirectIfFound && !data) ||
+        (redirectIfFound && data)
+      ) {
+        router.push(redirectTo)
+      }
+    }, [data, redirectIfFound, redirectTo, router])
+    
+    const login = async (user: UserLogin, fn?: Promise<boolean>) => {
+        const res = await axiosClient.post(`/auth/login`, user).then((res) => {
+            console.log(res)
+            return res?.data
+        })
+        if(res?.success && fn) {
+            fn
+        }
+        res?.success && mutate(url)
         return res
     }
 
-    const register = async (user: UserRegister) => {
+    const register = async (user: UserRegister, fn?: Promise<boolean>) => {
         const res = await (await axiosClient.post(`/auth/register`, user)).data
         res?.success && mutate(url)
         return res

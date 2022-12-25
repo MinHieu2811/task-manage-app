@@ -2,6 +2,8 @@ import httpProxy from "http-proxy";
 import Cookies from "cookies";
 import url from "url";
 import { NextApiRequest, NextApiResponse } from "next";
+import { withIronSessionApiRoute } from 'iron-session/next'
+import { sessionOptions } from "@/utils/sessions";
 // Get the actual API_URL as an environment variable. For real
 // applications, you might want to get it from 'next/config' instead.
 const API_URL = process.env.BE_URL;
@@ -13,7 +15,7 @@ export const config = {
   },
 };
 
-export default async function handler(
+async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
@@ -28,7 +30,7 @@ export default async function handler(
     // Don't forward cookies to the API:
     req.headers.cookie = "";
     if (isLogin) {
-      proxy.once("proxyRes", interceptLoginResponse);
+      proxy.once("proxyRes", (proxyRes) => interceptLoginResponse(proxyRes, req, res));
     }
     // Don't forget to handle errors:
     proxy.once("error", reject);
@@ -44,7 +46,7 @@ export default async function handler(
       // want to pass along the auth token).
       selfHandleResponse: isLogin,
     });
-    function interceptLoginResponse(proxyRes: any, req: any, res: any) {
+    function interceptLoginResponse(proxyRes?: any, req?: NextApiRequest, res?: NextApiResponse) {
       // Read the API's response body from
       // the stream:
       let apiResponseBody = "";
@@ -57,12 +59,18 @@ export default async function handler(
       proxyRes.on("end", async () => {
         try {
           // Extract the authToken from API's response:
-          const { access_token, user, success, message } =
-            JSON.parse(apiResponseBody);
+          const { access_token, success, message } =
+            JSON.parse(apiResponseBody)
+            
+            if(req?.session && access_token) {
+              req.session.token = access_token
+            }
+
+            await req?.session.save()
           // Set the authToken as an HTTP-only cookie.
           // We'll also set the SameSite attribute to
           // 'lax' for some additional CSRF protection.
-          const cookies = new Cookies(req, res);
+          const cookies = new Cookies(req as NextApiRequest, res as NextApiResponse);
           cookies.set("auth-token", access_token, {
             httpOnly: true,
             sameSite: "lax",
@@ -71,7 +79,7 @@ export default async function handler(
           // Our response to the client won't contain
           // the actual authToken. This way the auth token
           // never gets exposed to the client.
-          res.status(200).json({ user, success, message });
+          res?.status(200).json({ success, message });
           resolve();
         } catch (err) {
           reject(err);
@@ -80,3 +88,5 @@ export default async function handler(
     }
   });
 }
+
+export default withIronSessionApiRoute(handler, sessionOptions)
