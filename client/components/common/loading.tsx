@@ -42,18 +42,18 @@ const StyledLoadingDot = styled.div`
         border-radius: 100%;
         animation: sk-chase-dot-before 2.0s infinite ease-in-out both; 
     }
-    :nth-child(1) { animation-delay: -1.1s; }
-    :nth-child(2) { animation-delay: -1.0s; }
-    :nth-child(3) { animation-delay: -0.9s; }
-    :nth-child(4) { animation-delay: -0.8s; }
-    :nth-child(5) { animation-delay: -0.7s; }
-    :nth-child(6) { animation-delay: -0.6s; }
-    :nth-child(1):before { animation-delay: -1.1s; }
-    :nth-child(2):before { animation-delay: -1.0s; }
-    :nth-child(3):before { animation-delay: -0.9s; }
-    :nth-child(4):before { animation-delay: -0.8s; }
-    :nth-child(5):before { animation-delay: -0.7s; }
-    :nth-child(6):before { animation-delay: -0.6s; }
+    :nth-of-type(1) { animation-delay: -1.1s; }
+    :nth-of-type(2) { animation-delay: -1.0s; }
+    :nth-of-type(3) { animation-delay: -0.9s; }
+    :nth-of-type(4) { animation-delay: -0.8s; }
+    :nth-of-type(5) { animation-delay: -0.7s; }
+    :nth-of-type(6) { animation-delay: -0.6s; }
+    :nth-of-type(1):before { animation-delay: -1.1s; }
+    :nth-of-type(2):before { animation-delay: -1.0s; }
+    :nth-of-type(3):before { animation-delay: -0.9s; }
+    :nth-of-type(4):before { animation-delay: -0.8s; }
+    :nth-of-type(5):before { animation-delay: -0.7s; }
+    :nth-of-type(6):before { animation-delay: -0.6s; }
     @keyframes sk-chase {
         100% { transform: rotate(360deg); } 
     }

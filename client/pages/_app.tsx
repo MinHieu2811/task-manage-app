@@ -22,9 +22,9 @@ function MyApp({
       <CacheProvider value={emotionCache}>
         <ThemeProvider theme={theme}>
           <Layout>
-            {/* <NotiProvider> */}
-            <Component {...pageProps} />
-            {/* </NotiProvider> */}
+            <NotiProvider>
+              <Component {...pageProps} />
+            </NotiProvider>
           </Layout>
         </ThemeProvider>
       </CacheProvider>

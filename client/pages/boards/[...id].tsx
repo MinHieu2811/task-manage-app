@@ -3,8 +3,7 @@ import * as React from 'react';
 import styled from '@emotion/styled'
 import { Helmet } from '@/component/common';
 // import BoardWrapper from '@/component/common/board';
-import { BoardModel, SectionModel } from '@/models/board';
-import { useDispatch } from 'react-redux';
+import { BoardModel } from '@/models/board';
 import { setSection } from 'redux/features/sectionSlice';
 import MainBoard from '@/component/common/main-board';
 import axios, { AxiosRequestConfig } from 'axios';

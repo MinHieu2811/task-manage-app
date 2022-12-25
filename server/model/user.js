@@ -47,7 +47,7 @@ userSchema.methods.generateJWT = function() {
 
     return jwt.sign(payload, process.env.JWT_SECRET, {
         // expiresIn: parseInt(expirationDate.getTime() / 1000, 10)
-        expiresIn: '30d'
+        expiresIn: '8h'
     })
 }
 

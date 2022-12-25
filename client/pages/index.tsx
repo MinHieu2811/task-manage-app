@@ -95,11 +95,23 @@ export const getServerSideProps = async (context: GetServerSidePropsContext): Pr
     }
     const user = context?.req.session?.user
     if (authCookies && validateToken(authCookies || '')) {
-      const board = await axios.get('http://localhost:3000/api/board', config).then((res) => res.data)
+      try {
+        const board = await axios.get('http://localhost:3000/api/board', config).then((res) => res.data)
       resProps['user'] = user || {
         id: '',
         email: '',
         username: ''
+      }
+      console.log(board?.response?.status);
+
+      if(board?.response?.status === 401) {
+        return {
+          redirect: {
+            permanent: false,
+            destination: '/login',
+          },
+          props: {},
+        }
       }
       resProps['board'] = board?.data
 
@@ -111,6 +123,15 @@ export const getServerSideProps = async (context: GetServerSidePropsContext): Pr
         props: resProps,
       } : {
         props: resProps
+      }
+      } catch (error) {
+        return {
+          redirect: {
+            permanent: false,
+            destination: '/login',
+          },
+          props: {error},
+        }
       }
     } else {
       return {

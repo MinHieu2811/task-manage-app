@@ -6,6 +6,7 @@ import { BoardData, UserLogin, UserRegister } from '@/models/index'
 import { User } from '@/models/index'
 import { useEffect } from 'react'
 import { useRouter } from 'next/router'
+import { useNotiContext } from '@/component/common/notification'
 
 interface useAuthRes {
     data: User | undefined | unknown
@@ -15,6 +16,7 @@ interface useAuthRes {
     getUser: (url: string) => Promise<AxiosResponse<User>>
     register: (userRegister: UserRegister, fn?: Promise<boolean>) => Promise<AxiosResponse<void>>
     login: (userLogin: UserLogin, fn?: Promise<boolean>) => Promise<AxiosResponse<void>>
+    logout: (fn?: Promise<boolean>) => void
 }
 
 interface useAuthProps<T> {
@@ -25,6 +27,7 @@ interface useAuthProps<T> {
 
 export const useAuth = ({url, fetcher, options}: useAuthProps<User>, redirectTo: string = '', redirectIfFound: boolean = false): useAuthRes => {
     const router = useRouter()
+    const { notiDispatch } = useNotiContext()
     const { data, isLoading, isValidating, error, mutate } = useSWR(url, fetcher, options)
 
     useEffect(() => {
@@ -45,6 +48,13 @@ export const useAuth = ({url, fetcher, options}: useAuthProps<User>, redirectTo:
         if(res?.success && fn) {
             fn
         }
+        notiDispatch({
+            type: 'REMOVE_ALL_AND_ADD',
+            payload: {
+                content: 'Logged in successfully!',
+                type: 'is-success',
+            },
+        })
         res?.success && mutate(url)
         return res
     }
@@ -61,6 +71,19 @@ export const useAuth = ({url, fetcher, options}: useAuthProps<User>, redirectTo:
         return res
     }
 
+    const logout = async (fn?: Promise<boolean>) => {
+        await axiosClient.post('/auth/logout').then((res) => {
+            fn && fn
+            notiDispatch({
+                type: 'REMOVE_ALL_AND_ADD',
+                payload: {
+                    content: 'Signed out successfully!',
+                    type: 'is-success',
+                },
+            })
+        })
+    }
+
     return {
         data,
         isLoading,
@@ -68,6 +91,7 @@ export const useAuth = ({url, fetcher, options}: useAuthProps<User>, redirectTo:
         error,
         login,
         register,
-        getUser
+        getUser,
+        logout
     }
 }

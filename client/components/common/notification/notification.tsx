@@ -56,10 +56,18 @@ const StyledNotiWrapper = styled.div`
 
 const StyledNoti = styled.div`
   border-radius: 6px;
-  padding: 5px 10px;
+  padding: 2px 10px;
   display: flex;
+  font-weight: 600;
   justify-content: space-between;
   align-items: center;
+  &.is-success {
+    background-color: #21f379 !important;
+    border: 2px solid #1dd86b !important;
+    box-shadow: 0px 6.4px 14.4px rgba(101, 115, 129, 0.13) !important;
+    border-radius: 8px;
+    color: #363636 !important;
+  }
   &.is-info {
     background-color: #f1f9fe !important;
     border: 2px solid #2196f3 !important;

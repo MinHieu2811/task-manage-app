@@ -20,31 +20,49 @@ import {
 import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined'
 import AddBoxOutlinedIcon from '@mui/icons-material/AddBoxOutlined'
 import styled from '@emotion/styled'
-import { BoardData, BoardModel } from '@/models/index'
+import { BoardData, BoardModel, User } from '@/models/index'
 import { useRouter } from 'next/router'
 import { Loading } from './loading'
 import { useNotiContext } from './notification'
-import { generateId } from '@/utils/generateId'
 import { useSelector } from 'react-redux'
 import axiosClient from 'api-client/axios-client'
 import { useBoard } from '@/hooks/use-board'
 import { AxiosResponse } from 'axios'
+import { useAuth } from '@/hooks/use-auth'
+import Avatar from '@mui/material/Avatar'
 
 const StyledContainer = styled.div`
   position: relative;
   max-width: 250px;
 `
 
+const StyledAvatar = styled(Avatar)`
+  font-size: 25px;
+  background: gray;
+  color: black;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 10px;
+  cursor: pointer;
+`
+
 export function Sidebar() {
   const theme = useTheme()
   const router = useRouter()
   const { notiDispatch } = useNotiContext()
-  const boards = useSelector((state: any) => state.board.value)
 
-  const fetcher = async (url: string): Promise<AxiosResponse<BoardData>> => {
+  const fetcherBoard = async (url: string): Promise<AxiosResponse<BoardData>> => {
     return await axiosClient.get(url)
   }
-  const { dataRes, isLoading, isValidating, error: fetchError, addBoard } = useBoard({url: `/board`, fetcher}) 
+  const fetcherUser = async (url: string): Promise<AxiosResponse<User>> => {
+    return await axiosClient.get(url)
+  }
+  const { dataRes, isLoading, isValidating, error: fetchError, addBoard } = useBoard({url: `/board`, fetcher: fetcherBoard}) 
+  const { data, isLoading: loadingUser, logout } = useAuth({url: '/auth/user', fetcher: fetcherUser})
 
   const addBoardHandle = async () => {
     // const genId = generateId()
@@ -59,6 +77,17 @@ export function Sidebar() {
     //     userId: '',
     //   }
     // })
+    notiDispatch({
+      type: 'REMOVE_ALL_AND_ADD',
+      payload: {
+        content: 'Sign out successfully!',
+        type: 'is-success',
+      },
+    })
+  }
+
+  const loggedOutHandler = async () => {
+    await logout(router.replace('/login'))
   }
 
   const onDragEndHandler = async ({ source, destination }: DropResult) => {
@@ -73,23 +102,10 @@ export function Sidebar() {
     }
   }
 
-  const handleSignOut = async () => {
-    // await signOut().then(() => {
-    //   if (!signOutErr) {
-    //     notiDispatch({
-    //       type: 'REMOVE_ALL_AND_ADD',
-    //       payload: {
-    //         content: 'Sign out successfully!',
-    //         type: 'is-info',
-    //       },
-    //     })
-    //   }
-    // })
-  }
   return (
     <StyledContainer>
-      {(isLoading) && (
-        <Loading isLoading={isLoading} />
+      {(isLoading || loadingUser) && (
+        <Loading isLoading={isLoading || loadingUser} />
       )}
       <List
         disablePadding
@@ -116,17 +132,20 @@ export function Sidebar() {
                 justifyContent: 'flex-start',
               }}
             >
+              <Tooltip title={data?.email}>
+                <StyledAvatar>{data?.username?.substring(0, 1).toUpperCase()}</StyledAvatar>
+              </Tooltip>
               <Typography
                 variant="body2"
                 fontWeight="700"
                 style={{ color: 'white' }}
               >
-                {''}
+                {data?.username}
               </Typography>
             </Box>
             <Tooltip title="Logout">
               <IconButton
-                onClick={handleSignOut}
+                onClick={loggedOutHandler}
                 sx={{
                   ':hover': {
                     backgroundColor: 'rgba(243, 236, 236, 0.637) !important',
@@ -189,7 +208,7 @@ export function Sidebar() {
                     dataRes?.data?.map((item: BoardModel, index: number) => (
                       <Draggable
                         key={item?._id}
-                        draggableId={item._id}
+                        draggableId={item._id || ''}
                         index={index}
                       >
                         {(provided, snapshot) => (
@@ -198,14 +217,14 @@ export function Sidebar() {
                             {...provided.dragHandleProps}
                             {...provided.draggableProps}
                             selected={router?.query?.id?.includes(
-                              item?._id,
+                              item?._id as string,
                             )}
                             component={Link}
                             href={`/boards/${item._id}`}
                             sx={{
                               pl: '20px',
                               backgroundColor: `${
-                                router?.query?.id?.includes(item?._id)
+                                router?.query?.id?.includes(item?._id as string)
                                   ? `${theme?.palette?.secondary?.main} !important`
                                   : 'transparent'
                               }`,
