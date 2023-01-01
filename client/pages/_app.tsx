@@ -8,6 +8,7 @@ import { NotiProvider } from '@/component/common/notification/noti-context'
 import { Provider } from 'react-redux'
 import { store } from 'redux/store'
 import App from 'next/app'
+import { SessionProvider } from 'next-auth/react'
 const clientSideEmotionCache = createEmotionCache()
 
 function MyApp({
@@ -18,7 +19,8 @@ function MyApp({
   const Layout = Component.Layout ?? EmptyLayout
 
   return (
-    <Provider store={store}>
+    <SessionProvider session={pageProps.session}>
+      <Provider store={store}>
       <CacheProvider value={emotionCache}>
         <ThemeProvider theme={theme}>
           <Layout>
@@ -29,6 +31,7 @@ function MyApp({
         </ThemeProvider>
       </CacheProvider>
     </Provider>
+    </SessionProvider>
   )
 }
 

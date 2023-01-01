@@ -1,7 +1,17 @@
 import User from '../model/user.js'
 import jsonwebtoken from 'jsonwebtoken'
 import asyncHandler from 'express-async-handler'
+import jwt from 'jsonwebtoken'
 
+export const validateToken = (token) => {
+    jwt.verify(token, process.env.JWT_SECRET || '', (err) => {
+      if(err instanceof jwt.JsonWebTokenError) {
+        return false
+      }
+    })
+  
+    return true
+}
 
 const verifyToken = asyncHandler(async (req, res, next) => {
     let token;
@@ -9,12 +19,15 @@ const verifyToken = asyncHandler(async (req, res, next) => {
     if(req.headers.authorization && req.headers.authorization.startsWith('Bearer')){
         try{
             token = req.headers.authorization.split(' ')[1];
-
-            const decoded = jsonwebtoken.verify(token, process.env.JWT_SECRET);
-
-            req.user = await User.findById(decoded.id).select('-password')
-
-            next()
+            if(validateToken(token)) {
+                const decoded = jsonwebtoken.verify(token, process.env.JWT_SECRET);
+                req.user = await User.findById(decoded.id).select('-password')
+                
+                next()
+            } else {
+                res.status(401)
+                throw new Error('Not authorized')
+            }
         }catch(err){
             console.log(err)
             res.status(401)

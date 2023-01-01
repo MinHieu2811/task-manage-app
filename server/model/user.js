@@ -21,35 +21,35 @@ const userSchema = mongoose.Schema({
     timestamps: true
 })
 
-userSchema.methods.matchPassword = async function(enteredPassword) {
-    return await bcrypt.compare(enteredPassword, this.password);
-}
+// userSchema.methods.matchPassword = async function(enteredPassword) {
+//     return await bcrypt.compare(enteredPassword, this.password);
+// }
 
-userSchema.pre('save', async function(next) {
-    if(!this.isModified('password')) {
-        next()
-    }
+// userSchema.pre('save', async function(next) {
+//     if(!this.isModified('password')) {
+//         next()
+//     }
 
-    const salt = await bcrypt.genSalt(10);
-    this.password = await bcrypt.hash(this.password, salt);
-})
+//     const salt = await bcrypt.genSalt(10);
+//     this.password = await bcrypt.hash(this.password, salt);
+// })
 
-userSchema.methods.generateJWT = function() {
-    const today = new Date();
-    const expirationDate = new Date(today);
-    expirationDate.setDate(today.getDate() + 60);
+// userSchema.methods.generateJWT = function() {
+//     const today = new Date();
+//     const expirationDate = new Date(today);
+//     expirationDate.setDate(today.getDate() + 60);
 
-    let payload = {
-        id: this._id,
-        email: this.email,
-        username: this.username,
-    };
+//     let payload = {
+//         id: this._id,
+//         email: this.email,
+//         username: this.username,
+//     };
 
-    return jwt.sign(payload, process.env.JWT_SECRET, {
-        // expiresIn: parseInt(expirationDate.getTime() / 1000, 10)
-        expiresIn: '8h'
-    })
-}
+//     return jwt.sign(payload, process.env.JWT_SECRET, {
+//         // expiresIn: parseInt(expirationDate.getTime() / 1000, 10)
+//         expiresIn: '8h'
+//     })
+// }
 
 const User = mongoose.model("User", userSchema)
 

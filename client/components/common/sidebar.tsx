@@ -24,12 +24,11 @@ import { BoardData, BoardModel, User } from '@/models/index'
 import { useRouter } from 'next/router'
 import { Loading } from './loading'
 import { useNotiContext } from './notification'
-import { useSelector } from 'react-redux'
 import axiosClient from 'api-client/axios-client'
 import { useBoard } from '@/hooks/use-board'
 import { AxiosResponse } from 'axios'
-import { useAuth } from '@/hooks/use-auth'
 import Avatar from '@mui/material/Avatar'
+import { useSession, signOut } from 'next-auth/react'
 
 const StyledContainer = styled.div`
   position: relative;
@@ -55,14 +54,14 @@ export function Sidebar() {
   const router = useRouter()
   const { notiDispatch } = useNotiContext()
 
+  const { data: session, status } = useSession()
   const fetcherBoard = async (url: string): Promise<AxiosResponse<BoardData>> => {
     return await axiosClient.get(url)
   }
-  const fetcherUser = async (url: string): Promise<AxiosResponse<User>> => {
-    return await axiosClient.get(url)
-  }
-  const { dataRes, isLoading, isValidating, error: fetchError, addBoard } = useBoard({url: `/board`, fetcher: fetcherBoard}) 
-  const { data, isLoading: loadingUser, logout } = useAuth({url: '/auth/user', fetcher: fetcherUser})
+  const { dataRes, isLoading, error: fetchError, addBoard } = useBoard({url: `/board`, fetcher: fetcherBoard, options: {
+    refreshInterval: 5*60*60,
+    shouldRetryOnError: false
+  }}) 
 
   const addBoardHandle = async () => {
     // const genId = generateId()
@@ -87,7 +86,14 @@ export function Sidebar() {
   }
 
   const loggedOutHandler = async () => {
-    await logout(router.replace('/login'))
+    // await logout(router.replace('/login'))
+    await signOut({callbackUrl: '/login'}).then(() => status === 'authenticated' && notiDispatch({
+      type: 'REMOVE_ALL_AND_ADD',
+      payload: {
+        content: 'Sign out successfully!',
+        type: 'is-success',
+      },
+    }))
   }
 
   const onDragEndHandler = async ({ source, destination }: DropResult) => {
@@ -104,8 +110,8 @@ export function Sidebar() {
 
   return (
     <StyledContainer>
-      {(isLoading || loadingUser) && (
-        <Loading isLoading={isLoading || loadingUser} />
+      {(isLoading) && (
+        <Loading isLoading={isLoading} />
       )}
       <List
         disablePadding
@@ -132,15 +138,17 @@ export function Sidebar() {
                 justifyContent: 'flex-start',
               }}
             >
-              <Tooltip title={data?.email}>
-                <StyledAvatar>{data?.username?.substring(0, 1).toUpperCase()}</StyledAvatar>
+              <Tooltip title={session?.user?.email}>
+                {/* <StyledAvatar>{session?.user?.name?.substring(0, 1).toUpperCase()}</StyledAvatar>
+                 */}
+                 <StyledAvatar src={session?.user?.image as string} />
               </Tooltip>
               <Typography
                 variant="body2"
                 fontWeight="700"
                 style={{ color: 'white' }}
               >
-                {data?.username}
+                {session?.user?.name}
               </Typography>
             </Box>
             <Tooltip title="Logout">

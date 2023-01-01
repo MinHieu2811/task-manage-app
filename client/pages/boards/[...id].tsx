@@ -35,7 +35,6 @@ export default function BoardPage ({data}: IAppProps) {
 
 export const getServerSideProps = async (context: GetServerSidePropsContext) => {
   const boardId = context?.params?.id as string[]
-  console.log(boardId)
   const cookies = new Cookies(context?.req, context?.res)
   const authCookie = cookies?.get('auth-token')
 
