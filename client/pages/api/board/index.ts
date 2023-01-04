@@ -3,6 +3,8 @@ import { BoardData } from "../../../models/index";
 import httpProxy from "http-proxy";
 import Cookies from 'cookies'
 import url from 'url'
+import { getToken } from "next-auth/jwt";
+import jwt from 'jsonwebtoken'
 
 interface ActionProps {
   message: string;
@@ -16,19 +18,13 @@ export default async function handler(
   res: NextApiResponse<BoardData[] | ActionProps>
 ) {
   if (req.method === "GET") {
-    return new Promise<void>((resolve, reject) => {
+    return new Promise<void>(async (resolve, reject) => {
       const pathname = url.parse(req?.url || "")?.pathname;
       const isLogin = pathname === "/api/auth/login";
-
-      const cookies = new Cookies(req, res);
-      const authToken = cookies.get("auth-token");
 
       req.url = req.url?.replace(/^\/api/, "data");
       // Set auth-token header from cookie:
       req.headers.cookie = "";
-      if (authToken) {
-        req.headers['authorization'] = `Bearer ${authToken}`;
-      }
       if (isLogin) {
         proxy.once("proxyRes", interceptLoginResponse);
       }

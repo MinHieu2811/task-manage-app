@@ -17,14 +17,15 @@ interface useBoardRes {
 }
 
 interface useBoardProps<T> {
-    url: string,
-    fetcher: (url: string) => Promise<AxiosResponse<T>>,
+    url: string
+    fetcher: (url: string, token?: string) => Promise<AxiosResponse<T>>
     // fetcher: Fetcher<BoardModel>
     options?: Partial<PublicConfiguration>
+    token?: string
 }
 
-export const useBoard = ({url, fetcher, options}: useBoardProps<BoardData>): useBoardRes => {
-    const { data, isLoading, isValidating, error, mutate } = useSWR(url, fetcher, options)
+export const useBoard = ({url, fetcher, options, token}: useBoardProps<BoardData>): useBoardRes => {
+    const { data, isLoading, isValidating, error, mutate } = useSWR(token && token?.length > 0 ? [url, token] : url, ([url, token]) => fetcher(url, token), options)
 
     const addBoard = async (urlPost: string, newBoard: BoardModel) => {
         const res = await (await axiosClient.post(`${urlPost}/create`, newBoard)).data

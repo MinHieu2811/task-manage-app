@@ -2,6 +2,7 @@ import User from '../model/user.js'
 import jsonwebtoken from 'jsonwebtoken'
 import asyncHandler from 'express-async-handler'
 import jwt from 'jsonwebtoken'
+import connect from '../connectDB.js'
 
 export const validateToken = (token) => {
     jwt.verify(token, process.env.JWT_SECRET || '', (err) => {
@@ -20,8 +21,8 @@ const verifyToken = asyncHandler(async (req, res, next) => {
         try{
             token = req.headers.authorization.split(' ')[1];
             if(validateToken(token)) {
-                const decoded = jsonwebtoken.verify(token, process.env.JWT_SECRET);
-                req.user = await User.findById(decoded.id).select('-password')
+                const decoded = jwt.verify(token, process.env.JWT_SECRET);
+                req.user = await User.findById(decoded.id)
                 
                 next()
             } else {

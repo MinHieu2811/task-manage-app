@@ -26,11 +26,13 @@ export const authOptions: NextAuthOptions = {
       
       if(session.user && user && user?.email) {
         const id = user.id
+        // add field id to session.user
+        session.user.id = id
+
+        console.log(session?.user);
         const token = jwt.sign(session?.user, process.env.JWT_SECRET || '', {
           expiresIn: '8h'
         })
-        // add field id to session.user
-        session.user.id = id
         session.user.token = token
       }
       return session

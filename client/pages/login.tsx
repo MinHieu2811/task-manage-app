@@ -75,13 +75,7 @@ export default function LoginPage() {
   }
 
   const signInHandler = (key: string) => {
-    signIn(key, {redirect: false, callbackUrl: '/'}).then(() => notiDispatch({
-      type: 'REMOVE_ALL_AND_ADD',
-      payload: {
-        content: 'Logged in successfully!',
-        type: 'is-success',
-      },
-    }))
+    signIn(key, {redirect: false, callbackUrl: '/'})
   } 
 
   const { data: session, status } = useSession()

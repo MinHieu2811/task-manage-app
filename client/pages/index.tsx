@@ -7,9 +7,10 @@ import { useBoard } from '@/hooks/use-board'
 import axiosClient from 'api-client/axios-client'
 import { BoardModel, User } from '../models'
 import Cookies from 'cookies'
-import { getSession } from 'next-auth/react'
-import { validateToken } from '@/utils/sessions'
-import jwt from 'jsonwebtoken'
+import { getSession, useSession } from 'next-auth/react'
+import React from 'react'
+import { AxiosRequestConfig } from 'axios'
+import { useNotiContext } from '@/component/common/notification'
 
 const StyledContainer = styled(Box)`
   display: flex;
@@ -20,13 +21,35 @@ const StyledContainer = styled(Box)`
 `
 
 const Home = () => {
-  const fetcher = async (url: string) => {
-    return await axiosClient.get(url)
+  // const { data } = useTokenContext()
+  const {notiDispatch} = useNotiContext()
+  const { data: session } = useSession()
+  const fetcher = async (url: string, token?: string) => {
+    const config: AxiosRequestConfig = {
+      headers: {
+        'Content-Type': 'application/json',
+        'authorization': `Bearer ${token ? token : ''}`
+      }
+    }
+    return await axiosClient.get(url, config)
   }
-  // const { dataRes, addBoard } = useBoard({ url: `/board`, fetcher })
+  const { dataRes, addBoard } = useBoard({ url: `/board`, fetcher, token: session?.user?.token, options: {
+    refreshInterval: 2000*5,
+    shouldRetryOnError(err) {
+        notiDispatch({
+          type: 'REMOVE_ALL_AND_ADD',
+          payload: {
+            type: "is-danger",
+            content: `Error: ${err}`
+          }
+        })
+
+        return false
+    },
+  }})
   const addBoardHandle = async () => {
     const session = await getSession()
-    console.log(session)
+    // console.log(session)
   }
   return (
     <StyledContainer>
@@ -49,74 +72,5 @@ const Home = () => {
     </StyledContainer>
   )
 }
-
-// export const getServerSideProps = async (context: GetServerSidePropsContext): Promise<GetServerSidePropsResult<any>> => {
-//     const cookies = new Cookies(context?.req, context?.res)
-//     const authCookies = cookies.get('auth-token')
-//     const config = {
-//       headers: {
-//         'Content-Type': 'application/json',
-//         'Authorization': `Bearer ${authCookies}`
-//       }
-//     }
-    
-//     let resProps: Props = {
-//       board: [{}],
-//       user: {
-//         id: '',
-//         email: '',
-//         username: '',
-//       },
-//     }
-//     const user = context?.req.session?.user
-//     if (authCookies && validateToken(authCookies || '')) {
-//       try {
-//         const board = await axios.get('http://localhost:3000/api/board', config).then((res) => res.data)
-//       resProps['user'] = user || {
-//         id: '',
-//         email: '',
-//         username: ''
-//       }
-//       console.log(board?.response?.status);
-
-//       if(board?.response?.status === 401) {
-//         return {
-//           redirect: {
-//             permanent: false,
-//             destination: '/login',
-//           },
-//           props: {},
-//         }
-//       }
-//       resProps['board'] = board?.data
-
-//       return board?.data?.length > 0 ? {
-//         redirect: {
-//           permanent: false,
-//           destination: `/boards/${board?.data[0]?._id}`,
-//         },
-//         props: resProps,
-//       } : {
-//         props: resProps
-//       }
-//       } catch (error) {
-//         return {
-//           redirect: {
-//             permanent: false,
-//             destination: '/login',
-//           },
-//           props: {error},
-//         }
-//       }
-//     } else {
-//       return {
-//         redirect: {
-//           permanent: false,
-//           destination: '/login',
-//         },
-//         props: {},
-//       }
-//     }
-//   }
 
 export default Home
