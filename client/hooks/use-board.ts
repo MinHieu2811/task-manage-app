@@ -1,5 +1,5 @@
 import axiosClient from 'api-client/axios-client'
-import { AxiosError, AxiosResponse } from 'axios'
+import { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios'
 import { useEffect } from 'react'
 import { useDispatch } from 'react-redux'
 import useSWR from 'swr'
@@ -12,7 +12,7 @@ interface useBoardRes {
     isValidating: boolean
     isLoading: boolean
     error: AxiosError
-    addBoard: (urlPost: string, newBoard: BoardModel) => Promise<AxiosResponse<void>>
+    addBoard: () => Promise<AxiosResponse<void>>
     deleteBoard: (urlDelete: string, idBoard: string) => Promise<AxiosResponse<void>>
 }
 
@@ -26,9 +26,14 @@ interface useBoardProps<T> {
 
 export const useBoard = ({url, fetcher, options, token}: useBoardProps<BoardData>): useBoardRes => {
     const { data, isLoading, isValidating, error, mutate } = useSWR(token && token?.length > 0 ? [url, token] : url, ([url, token]) => fetcher(url, token), options)
-
-    const addBoard = async (urlPost: string, newBoard: BoardModel) => {
-        const res = await (await axiosClient.post(`${urlPost}/create`, newBoard)).data
+    const config: AxiosRequestConfig = {
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        }
+    }
+    const addBoard = async () => {
+        const res = await axiosClient.post(`http://localhost:3000/api/board`, undefined, config).then((res) => res?.data)
         res?.success && mutate()
         return res
     }

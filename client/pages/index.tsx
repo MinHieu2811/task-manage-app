@@ -8,9 +8,10 @@ import axiosClient from 'api-client/axios-client'
 import { BoardModel, User } from '../models'
 import Cookies from 'cookies'
 import { getSession, useSession } from 'next-auth/react'
-import React from 'react'
+import React, { useEffect } from 'react'
 import { AxiosRequestConfig } from 'axios'
 import { useNotiContext } from '@/component/common/notification'
+import { useRouter } from 'next/router'
 
 const StyledContainer = styled(Box)`
   display: flex;
@@ -24,6 +25,7 @@ const Home = () => {
   // const { data } = useTokenContext()
   const {notiDispatch} = useNotiContext()
   const { data: session } = useSession()
+  const router = useRouter()
   const fetcher = async (url: string, token?: string) => {
     const config: AxiosRequestConfig = {
       headers: {
@@ -47,10 +49,12 @@ const Home = () => {
         return false
     },
   }})
-  const addBoardHandle = async () => {
-    const session = await getSession()
-    // console.log(session)
-  }
+
+  useEffect(() => {
+    if(dataRes?.data?.length) {
+      router?.replace(`boards/${dataRes?.data[0]._id}`)
+    }
+  }, [dataRes?.data, router])
   return (
     <StyledContainer>
       <Helmet title="Taskido" />
@@ -65,7 +69,7 @@ const Home = () => {
           backgroundColor: '#1c1b22',
         }}
       >
-        <Button variant="outlined" color="success" onClick={addBoardHandle}>
+        <Button variant="outlined" color="success" onClick={addBoard}>
           Click here to create your first board
         </Button>
       </Box>

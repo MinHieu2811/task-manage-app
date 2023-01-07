@@ -21,17 +21,12 @@ export default async function handler(
     return new Promise<void>((resolve, reject) => {
       const pathname = url.parse(req?.url || "")?.pathname;
       const isLogin = pathname === "/api/auth/login";
-      // Get the `auth-token` cookie:
-      const cookies = new Cookies(req, res);
-      const authToken = cookies.get("auth-token");
   
       req.url = req.url?.replace(/^\/api/, "data");
       req.headers.cookie = "";
-      if (authToken) {
-        req.headers['authorization'] = `Bearer ${authToken}`;
-      }
-      if (isLogin) {
-        proxy.once("proxyRes", interceptLoginResponse);
+
+      if(isLogin) {
+        proxy.once("proxyRes", (proxyRes) => interceptLoginResponse(proxyRes, req, res));
       }
 
       proxy.once("error", reject);
@@ -39,7 +34,6 @@ export default async function handler(
       proxy.web(req, res, {
         target: API_URL,
         autoRewrite: false,
-        
       });
       function interceptLoginResponse(proxyRes: any, req: any, res: any) {
         // Read the API's response body from

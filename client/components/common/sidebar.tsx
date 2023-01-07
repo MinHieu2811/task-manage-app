@@ -26,7 +26,7 @@ import { Loading } from './loading'
 import { useNotiContext } from './notification'
 import axiosClient from 'api-client/axios-client'
 import { useBoard } from '@/hooks/use-board'
-import { AxiosResponse } from 'axios'
+import { AxiosRequestConfig } from 'axios'
 import Avatar from '@mui/material/Avatar'
 import { useSession, signOut } from 'next-auth/react'
 
@@ -54,35 +54,39 @@ export function Sidebar() {
   const router = useRouter()
   const { notiDispatch } = useNotiContext()
 
-  const { data: session, status } = useSession()
-  const fetcherBoard = async (url: string): Promise<AxiosResponse<BoardData>> => {
-    return await axiosClient.get(url)
+  const { data: session } = useSession()
+  const fetcher = async (url: string, token?: string) => {
+    const config: AxiosRequestConfig = {
+      headers: {
+        'Content-Type': 'application/json',
+        'authorization': `Bearer ${token ? token : ''}`
+      }
+    }
+    return await axiosClient.get(url, config)
   }
-  const { dataRes, isLoading, error: fetchError, addBoard } = useBoard({url: `/board`, fetcher: fetcherBoard, options: {
-    refreshInterval: 5*60*60,
-    shouldRetryOnError: false
-  }}) 
+  const { dataRes, addBoard } = useBoard({ url: `/board`, fetcher, token: session?.user?.token, options: {
+    refreshInterval: 2000,
+    shouldRetryOnError(err) {
+        notiDispatch({
+          type: 'REMOVE_ALL_AND_ADD',
+          payload: {
+            type: "is-danger",
+            content: `Error: ${err}`
+          }
+        })
+
+        return false
+    },
+  }})
 
   const addBoardHandle = async () => {
-    // const genId = generateId()
-    // await addBoard('/board',{
-    //   boardId: genId,
-    //   boardData: {
-    //     _id: genId,
-    //     description: 'This is description',
-    //     favorite: false,
-    //     icon: '',
-    //     title: 'Untitled',
-    //     userId: '',
-    //   }
-    // })
-    notiDispatch({
+    await addBoard().catch((err) => notiDispatch({
       type: 'REMOVE_ALL_AND_ADD',
       payload: {
-        content: 'Sign out successfully!',
+        content: `Error: ${err}`,
         type: 'is-success',
       },
-    })
+    }))
   }
 
   const loggedOutHandler = async () => {
@@ -110,8 +114,8 @@ export function Sidebar() {
 
   return (
     <StyledContainer>
-      {(isLoading) && (
-        <Loading isLoading={isLoading} />
+      {(!dataRes) && (
+        <Loading isLoading={!dataRes} />
       )}
       <List
         disablePadding
@@ -204,7 +208,7 @@ export function Sidebar() {
             </Tooltip>
           </Box>
         </ListItem>
-        {!isLoading && (
+        {dataRes && (
           <DragDropContext onDragEnd={onDragEndHandler}>
             <Droppable
               key={'list-board-droppable'}

@@ -105,18 +105,18 @@ export interface IMainBoardProps {
   board: BoardModel
 }
 
-export default function MainBoard({ board }: IMainBoardProps) {
-  const sectionArr = useSelector((state: any) => state?.section?.value)
+export default function MainBoard({ board }: any) {
+  // const sectionArr = useSelector((state: any) => state?.section?.value)
 
-  const fetcher = async (url: string) => {
-    return await axiosClient.get(url)
-  }
+  // const fetcher = async (url: string) => {
+  //   return await axiosClient.get(url)
+  // }
 
-  const { data, isLoading, error: fetchError, addSection} = useSection({url: `board/${board?._id}`, fetcher})
+  // const { data, isLoading, error: fetchError, addSection} = useSection({url: `board/${board?._id}`, fetcher})
   // const { deleteBoard } = useBoard({url: `/board/${board?.boardId}`, fetcher})
-  const handleAddSection = async () => {
-    await addSection({boardId: board?._id})
-  }
+  // const handleAddSection = async () => {
+  //   await addSection({boardId: board?._id})
+  // }
 
   // const deleteBoardHandle = async () => {
   //   await deleteBoard(`/board/${board?.boardId}`, board?.boardId)
@@ -170,7 +170,7 @@ export default function MainBoard({ board }: IMainBoardProps) {
         name="desc"
         placeholder={board?.description}
       />
-      <Box
+      {/* <Box
         sx={{
           display: 'flex',
           justifyContent: 'space-between',
@@ -188,7 +188,7 @@ export default function MainBoard({ board }: IMainBoardProps) {
         <Typography component="p" sx={{ color: 'white', fontSize: '1rem' }}>
           {sectionArr?.length} {sectionArr?.length > 0 ? 'sections' : 'section'}
         </Typography>
-      </Box>
+      </Box> */}
       <StyledLine />
       {/* <StyledSectionsWrapper>
         {sectionArr.length > 0 ? (
